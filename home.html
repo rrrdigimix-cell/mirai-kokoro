@@ -4,34 +4,74 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mirai Kokoro - Menu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
-<body style="margin:0; background:#FAF9F6; font-family:sans-serif; display:flex; justify-content:center; padding:24px 16px; box-sizing:border-box;">
+<body style="margin:0; background:#FAF9F6; font-family:'Inter',sans-serif; display:flex; justify-content:center; padding:28px 16px; box-sizing:border-box; min-height:100vh;">
 
-  <div style="width:320px; display:flex; flex-direction:column; align-items:center;">
+  <div style="width:100%; max-width:380px; display:flex; flex-direction:column; align-items:center;">
 
-    <p style="font-size:16px; font-weight:bold; color:#3C3489; margin:10px 0 2px;">Olá, seja bem-vinda</p>
-    <p style="font-size:13px; color:#534AB7; margin:0 0 24px;">o que vamos praticar hoje?</p>
+    <p style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:#1B2A4A; margin:6px 0 2px; text-align:center;">Olá, seja bem-vindo(a)</p>
+    <p style="font-size:13px; color:#8A8560; letter-spacing:0.4px; margin:0 0 26px; text-align:center;">o que vamos praticar hoje?</p>
 
-    <a href="videos.html" style="text-decoration:none; width:100%;">
-      <div style="background:#FFFFFF; border:1px solid #CECBF6; border-radius:14px; padding:16px; margin-bottom:14px;">
-        <p style="font-size:15px; font-weight:bold; color:#26215C; margin:0;">Vídeos</p>
-        <p style="font-size:13px; color:#5F5E5A; margin:4px 0 0;">técnicas guiadas em vídeo</p>
+    <div style="width:100%; display:flex; flex-direction:column; gap:14px;">
+
+      <a href="videos.html" style="text-decoration:none;">
+        <div style="display:flex; align-items:center; gap:14px; background:#FFFFFF; border-radius:14px; padding:16px; box-shadow:0 4px 16px rgba(27,42,74,0.07); box-sizing:border-box;">
+          <div style="min-width:44px; height:44px; border-radius:50%; background:#1B2A4A; display:flex; align-items:center; justify-content:center;">
+            <i class="ti ti-player-play" style="font-size:20px; color:#FFFFFF;"></i>
+          </div>
+          <div style="flex:1;">
+            <p style="font-size:15px; font-weight:600; color:#1B2A4A; margin:0;">Vídeos</p>
+            <p style="font-size:12.5px; color:#79778E; margin:2px 0 0;">técnicas guiadas em vídeo</p>
+          </div>
+          <i class="ti ti-chevron-right" style="font-size:18px; color:#C9C5B8;"></i>
+        </div>
+      </a>
+
+      <a href="audios.html" style="text-decoration:none;">
+        <div style="display:flex; align-items:center; gap:14px; background:#FFFFFF; border-radius:14px; padding:16px; box-shadow:0 4px 16px rgba(27,42,74,0.07); box-sizing:border-box;">
+          <div style="min-width:44px; height:44px; border-radius:50%; background:#8A8560; display:flex; align-items:center; justify-content:center;">
+            <i class="ti ti-headphones" style="font-size:20px; color:#FFFFFF;"></i>
+          </div>
+          <div style="flex:1;">
+            <p style="font-size:15px; font-weight:600; color:#1B2A4A; margin:0;">Áudios</p>
+            <p style="font-size:12.5px; color:#79778E; margin:2px 0 0;">meditações e respirações</p>
+          </div>
+          <i class="ti ti-chevron-right" style="font-size:18px; color:#C9C5B8;"></i>
+        </div>
+      </a>
+
+      <a href="materiais.html" style="text-decoration:none;">
+        <div style="display:flex; align-items:center; gap:14px; background:#FFFFFF; border-radius:14px; padding:16px; box-shadow:0 4px 16px rgba(27,42,74,0.07); box-sizing:border-box;">
+          <div style="min-width:44px; height:44px; border-radius:50%; background:#4F7A6A; display:flex; align-items:center; justify-content:center;">
+            <i class="ti ti-file-text" style="font-size:20px; color:#FFFFFF;"></i>
+          </div>
+          <div style="flex:1;">
+            <p style="font-size:15px; font-weight:600; color:#1B2A4A; margin:0;">Materiais</p>
+            <p style="font-size:12.5px; color:#79778E; margin:2px 0 0;">PDFs para ler e estudar</p>
+          </div>
+          <i class="ti ti-chevron-right" style="font-size:18px; color:#C9C5B8;"></i>
+        </div>
+      </a>
+
+    </div>
+
+    <div style="width:100%; display:flex; justify-content:space-around; border-top:1px solid #E4E1D8; margin-top:28px; padding-top:14px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <i class="ti ti-home" style="font-size:20px; color:#1B2A4A;"></i>
+        <span style="font-size:10px; color:#1B2A4A; font-weight:600;">início</span>
       </div>
-    </a>
-
-    <a href="audios.html" style="text-decoration:none; width:100%;">
-      <div style="background:#FFFFFF; border:1px solid #CECBF6; border-radius:14px; padding:16px; margin-bottom:14px;">
-        <p style="font-size:15px; font-weight:bold; color:#26215C; margin:0;">Áudios</p>
-        <p style="font-size:13px; color:#5F5E5A; margin:4px 0 0;">meditações e respirações</p>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <i class="ti ti-bell" style="font-size:20px; color:#C9C5B8;"></i>
+        <span style="font-size:10px; color:#8A8560;">avisos</span>
       </div>
-    </a>
-
-    <a href="materiais.html" style="text-decoration:none; width:100%;">
-      <div style="background:#FFFFFF; border:1px solid #CECBF6; border-radius:14px; padding:16px;">
-        <p style="font-size:15px; font-weight:bold; color:#26215C; margin:0;">Materiais</p>
-        <p style="font-size:13px; color:#5F5E5A; margin:4px 0 0;">PDFs para ler e estudar</p>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <i class="ti ti-user" style="font-size:20px; color:#C9C5B8;"></i>
+        <span style="font-size:10px; color:#8A8560;">perfil</span>
       </div>
-    </a>
+    </div>
 
   </div>
 
