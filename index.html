@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+Perfeito, o cadastro do usuário de teste (rrrkatayose@gmail.com) está confirmado. Agora vem a parte mais técnica: conectar esse sistema ao nosso index.html, para que o botão "Entrar" realmente verifique e-mail e senha antes de deixar passar.
+Etapa C: Conectando o Firebase ao index.html
+Vamos substituir todo o conteúdo do index.html por este código atualizado (já com sua configuração real do Firebase incluída):
+html<!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
@@ -11,15 +14,16 @@
     <div style="width:100%; background:#FFFFFF; border-radius:16px; padding:20px; box-shadow:0 6px 20px rgba(20,30,60,0.08); display:flex; flex-direction:column; gap:12px; box-sizing:border-box;">
       <div>
         <p style="font-size:11px; color:#79778E; margin:0 0 4px; font-weight:600;">E-MAIL</p>
-        <input type="email" placeholder="seu@email.com" style="width:100%; box-sizing:border-box; background:#F7F6F2; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+        <input id="campo-email" type="email" placeholder="seu@email.com" style="width:100%; box-sizing:border-box; background:#F7F6F2; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
       </div>
       <div>
         <p style="font-size:11px; color:#79778E; margin:0 0 4px; font-weight:600;">SENHA</p>
-        <input type="password" placeholder="••••••••" style="width:100%; box-sizing:border-box; background:#F7F6F2; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+        <input id="campo-senha" type="password" placeholder="••••••••" style="width:100%; box-sizing:border-box; background:#F7F6F2; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
       </div>
-      <a href="home.html" style="text-decoration:none; text-align:center;">
-        <button style="width:50%; margin-top:6px; height:44px; border-radius:9px; background:#1B2A4A; border:none; color:#FFFFFF; font-size:14px; font-weight:600;">ENTRAR</button>
-      </a>
+      <p id="mensagem-erro" style="font-size:12px; color:#B23A3A; text-align:center; margin:0; display:none;">E-mail ou senha incorretos.</p>
+      <div style="text-align:center;">
+        <button id="botao-entrar" style="width:50%; margin-top:6px; height:44px; border-radius:9px; background:#1B2A4A; border:none; color:#FFFFFF; font-size:14px; font-weight:600; cursor:pointer;">ENTRAR</button>
+      </div>
       <p style="font-size:11px; color:#8A8560; text-align:center; margin:4px 0 0;">esqueci minha senha</p>
     </div>
     <div style="width:100%; border-top:1px solid #E4E1D8; margin-top:20px; padding-top:14px; text-align:center;">
@@ -27,5 +31,39 @@
       <p style="font-size:10.5px; color:#79778E; margin:2px 0 0;">contato@miraikokoro.com · (00) 00000-0000</p>
     </div>
   </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuUQi_s4v0Iat3FkzEfY06lX1NIaDAJ3Y",
+      authDomain: "mirai-kokoro.firebaseapp.com",
+      projectId: "mirai-kokoro",
+      storageBucket: "mirai-kokoro.firebasestorage.app",
+      messagingSenderId: "601277675162",
+      appId: "1:601277675162:web:b2ab41cbb4709b008a9123"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("botao-entrar").addEventListener("click", function () {
+      const email = document.getElementById("campo-email").value;
+      const senha = document.getElementById("campo-senha").value;
+      const mensagemErro = document.getElementById("mensagem-erro");
+
+      mensagemErro.style.display = "none";
+
+      signInWithEmailAndPassword(auth, email, senha)
+        .then(function () {
+          window.location.href = "home.html";
+        })
+        .catch(function () {
+          mensagemErro.style.display = "block";
+        });
+    });
+  </script>
+
 </body>
 </html>
