@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mirai Kokoro - Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body style="margin:0; background:#FAF9F6; font-family:'Inter',sans-serif; display:flex; justify-content:center; padding:24px 16px; box-sizing:border-box; min-height:100vh;">
+
+  <div id="conteudo-pagina" style="width:100%; max-width:380px; display:none; flex-direction:column;">
+
+    <a href="home.html" style="text-decoration:none; display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+      <i class="ti ti-arrow-left" style="font-size:19px; color:#1B2A4A;"></i>
+      <p style="font-family:'Playfair Display',serif; font-weight:700; font-size:18px; color:#1B2A4A; margin:0;">Painel Administrativo</p>
+    </a>
+
+    <div style="display:flex; gap:8px; margin-bottom:18px;">
+      <div id="aba-clientes" onclick="mostrarAba('clientes')" style="flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; color:#FFFFFF; background:#1B2A4A;">Clientes</div>
+      <div id="aba-conteudo" onclick="mostrarAba('conteudo')" style="flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; color:#8A8560; background:#F0EEE6;">Conteúdo</div>
+    </div>
+
+    <div id="painel-clientes" style="display:flex; flex-direction:column; gap:12px;">
+      <p style="font-size:13px; color:#1B2A4A; font-weight:600; margin:0;">Cadastrar novo cliente</p>
+      <div>
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">E-MAIL DO CLIENTE</p>
+        <input id="input-email-cliente" type="email" placeholder="cliente@email.com" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+      </div>
+      <div>
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">SENHA DE ACESSO</p>
+        <input id="input-senha-cliente" type="text" placeholder="mínimo 6 caracteres" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+      </div>
+      <button id="botao-cadastrar-cliente" style="background:#1B2A4A; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; margin-top:6px;">+ Cadastrar cliente</button>
+      <p id="msg-cliente" style="font-size:12px; margin:0; display:none;"></p>
+    </div>
+
+    <div id="painel-conteudo" style="display:none; flex-direction:column; gap:12px;">
+      <p style="font-size:13px; color:#1B2A4A; font-weight:600; margin:0;">Adicionar novo conteúdo</p>
+
+      <div>
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">TIPO</p>
+        <select id="select-tipo" onchange="atualizarCategorias()" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+          <option>Vídeo</option>
+          <option>Áudio</option>
+          <option>Material (PDF)</option>
+        </select>
+      </div>
+
+      <div>
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">CATEGORIA</p>
+        <select id="select-categoria" onchange="verificarNovaCategoria()" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+          <option value="__nova__">+ Criar nova categoria...</option>
+        </select>
+      </div>
+
+      <div id="campo-nova-categoria">
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">NOME DA CATEGORIA</p>
+        <input id="input-nova-categoria" type="text" placeholder="ex: Adultos, Adolescentes..." style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+      </div>
+
+      <div>
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">TÍTULO</p>
+        <input id="input-titulo" type="text" placeholder="ex: Respiração Diafragmática" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+      </div>
+
+      <div>
+        <p id="label-link" style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">CÓDIGO DE INCORPORAÇÃO (EMBED) DO YOUTUBE</p>
+        <textarea id="input-link" rows="3" placeholder="cole aqui o código embed ou link" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px; font-family:'Inter',sans-serif;"></textarea>
+      </div>
+
+      <button id="botao-adicionar-conteudo" style="background:#1B2A4A; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; margin-top:6px;">+ Adicionar à lista</button>
+      <p id="msg-conteudo" style="font-size:12px; margin:0; display:none;"></p>
+
+      <p style="font-size:11px; color:#918D7E; margin:18px 0 4px;">itens já publicados</p>
+      <div id="lista-itens-publicados"></div>
+    </div>
+
+  </div>
+
+  <p id="mensagem-acesso-negado" style="display:none; text-align:center; color:#B23A3A; font-size:14px; margin-top:100px;">Acesso restrito. Redirecionando...</p>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuUQi_s4v0Iat3FkzEfY06lX1NIaDAJ3Y",
+      authDomain: "mirai-kokoro.firebaseapp.com",
+      projectId: "mirai-kokoro",
+      storageBucket: "mirai-kokoro.firebasestorage.app",
+      messagingSenderId: "601277675162",
+      appId: "1:601277675162:web:b2ab41cbb4709b008a9123"
+    };
+
+    const UID_ADMIN = "4jnMbmwV2JbSmKkzcJLBum7ybyK2";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.uid === UID_ADMIN) {
+        document.getElementById("conteudo-pagina").style.display = "flex";
+        carregarCategorias();
+        carregarItensPublicados();
+      } else {
+        document.getElementById("mensagem-acesso-negado").style.display = "block";
+        setTimeout(() => window.location.href = "home.html", 2000);
+      }
+    });
+
+    window.mostrarAba = function (nome) {
+      const painelClientes = document.getElementById("painel-clientes");
+      const painelConteudo = document.getElementById("painel-conteudo");
+      const abaClientes = document.getElementById("aba-clientes");
+      const abaConteudo = document.getElementById("aba-conteudo");
+      if (nome === "clientes") {
+        painelClientes.style.display = "flex";
+        painelConteudo.style.display = "none";
+        abaClientes.style.background = "#1B2A4A"; abaClientes.style.color = "#FFFFFF";
+        abaConteudo.style.background = "#F0EEE6"; abaConteudo.style.color = "#8A8560";
+      } else {
+        painelClientes.style.display = "none";
+        painelConteudo.style.display = "flex";
+        abaConteudo.style.background = "#1B2A4A"; abaConteudo.style.color = "#FFFFFF";
+        abaClientes.style.background = "#F0EEE6"; abaClientes.style.color = "#8A8560";
+      }
+    };
+
+    window.verificarNovaCategoria = function () {
+      const valor = document.getElementById("select-categoria").value;
+      document.getElementById("campo-nova-categoria").style.display = (valor === "__nova__") ? "block" : "none";
+    };
+
+    window.atualizarCategorias = function () { carregarCategorias(); };
+
+    async function carregarCategorias() {
+      const tipo = document.getElementById("select-tipo").value;
+      const q = query(collection(db, "conteudo"), where("tipo", "==", tipo));
+      const snap = await getDocs(q);
+      const categorias = new Set();
+      snap.forEach(doc => categorias.add(doc.data().categoria || "Geral"));
+
+      const label = document.getElementById("label-link");
+      label.textContent = (tipo === "Material (PDF)") ? "LINK DO GOOGLE DRIVE" : "CÓDIGO DE INCORPORAÇÃO (EMBED) DO YOUTUBE";
+
+      const select = document.getElementById("select-categoria");
+      select.innerHTML = "";
+      categorias.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat; opt.textContent = cat;
+        select.appendChild(opt);
+      });
+      const optNova = document.createElement("option");
+      optNova.value = "__nova__"; optNova.textContent = "+ Criar nova categoria...";
+      select.appendChild(optNova);
+      window.verificarNovaCategoria();
+    }
+
+    async function carregarItensPublicados() {
+      const snap = await getDocs(collection(db, "conteudo"));
+      const lista = document.getElementById("lista-itens-publicados");
+      lista.innerHTML = "";
+      snap.forEach(doc => {
+        const item = doc.data();
+        lista.innerHTML += `<div style="background:#FFFFFF; border-radius:12px; padding:12px 14px; box-shadow:0 3px 10px rgba(27,42,74,0.06); margin-top:8px;">
+          <p style="font-size:12.5px; font-weight:600; margin:0; color:#3A3A3A;">${item.titulo}</p>
+          <p style="font-size:10.5px; color:#918D7E; margin:2px 0 0;">${item.tipo} · ${item.categoria || "Geral"}</p>
+        </div>`;
+      });
+    }
+
+    document.getElementById("botao-adicionar-conteudo").addEventListener("click", async function () {
+      const tipo = document.getElementById("select-tipo").value;
+      let categoria = document.getElementById("select-categoria").value;
+      if (categoria === "__nova__") categoria = document.getElementById("input-nova-categoria").value.trim();
+      const titulo = document.getElementById("input-titulo").value.trim();
+      const link = document.getElementById("input-link").value.trim();
+      const msg = document.getElementById("msg-conteudo");
+
+      if (!categoria || !titulo || !link) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Preencha categoria, título e link antes de adicionar.";
+        msg.style.display = "block";
+        return;
+      }
+
+      await addDoc(collection(db, "conteudo"), { tipo, categoria, titulo, link, criadoEm: serverTimestamp() });
+
+      msg.style.color = "#3A6650";
+      msg.textContent = "✅ Conteúdo adicionado com sucesso!";
+      msg.style.display = "block";
+      document.getElementById("input-titulo").value = "";
+      document.getElementById("input-link").value = "";
+      document.getElementById("input-nova-categoria").value = "";
+
+      await carregarCategorias();
+      await carregarItensPublicados();
+    });
+
+    document.getElementById("botao-cadastrar-cliente").addEventListener("click", async function () {
+      const email = document.getElementById("input-email-cliente").value.trim();
+      const senha = document.getElementById("input-senha-cliente").value.trim();
+      const msg = document.getElementById("msg-cliente");
+
+      if (!email || !senha || senha.length < 6) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Preencha um e-mail válido e uma senha com pelo menos 6 caracteres.";
+        msg.style.display = "block";
+        return;
+      }
+
+      const appAuxiliar = getApps().find(a => a.name === "Auxiliar") || initializeApp(firebaseConfig, "Auxiliar");
+      const authAuxiliar = getAuth(appAuxiliar);
+
+      try {
+        await createUserWithEmailAndPassword(authAuxiliar, email, senha);
+        await signOut(authAuxiliar);
+        msg.style.color = "#3A6650";
+        msg.textContent = "✅ Cliente cadastrado! Agora repasse o e-mail e a senha a ele.";
+        msg.style.display = "block";
+        document.getElementById("input-email-cliente").value = "";
+        document.getElementById("input-senha-cliente").value = "";
+      } catch (erro) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Erro: " + (erro.code === "auth/email-already-in-use" ? "esse e-mail já está cadastrado." : erro.message);
+        msg.style.display = "block";
+      }
+    });
+  </script>
+
+</body>
+</html>
