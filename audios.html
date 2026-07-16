@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mirai Kokoro - Vídeos</title>
+  <title>Mirai Kokoro - Áudios</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -14,7 +14,7 @@
 
     <div id="cabecalho" style="display:flex; align-items:center; gap:10px; margin-bottom:20px; cursor:pointer;">
       <i class="ti ti-arrow-left" style="font-size:19px; color:#1B2A4A;"></i>
-      <p id="titulo-pagina" style="font-family:'Playfair Display',serif; font-weight:700; font-size:19px; color:#1B2A4A; margin:0;">Vídeos</p>
+      <p id="titulo-pagina" style="font-family:'Playfair Display',serif; font-weight:700; font-size:19px; color:#1B2A4A; margin:0;">Áudios</p>
     </div>
     <p id="subtitulo" style="font-size:11.5px; color:#918D7E; margin:0 0 14px;">carregando...</p>
     <div id="lista" style="display:flex; flex-direction:column; gap:12px;"></div>
@@ -70,7 +70,7 @@
 
       if (!categoriaAtual) {
         cabecalho.onclick = () => window.location.href = "home.html";
-        tituloPagina.textContent = "Vídeos";
+        tituloPagina.textContent = "Áudios";
         subtitulo.textContent = itens.length ? "escolha uma categoria" : "";
 
         const categorias = {};
@@ -100,7 +100,7 @@
             <p style="font-size:12.5px; color:#918D7E; margin:6px 0 0;">nenhum conteúdo publicado ainda</p></div>`;
         }
       } else {
-        cabecalho.onclick = () => window.location.href = "videos.html";
+        cabecalho.onclick = () => window.location.href = "audios.html";
         tituloPagina.textContent = categoriaAtual;
         subtitulo.textContent = "";
         const itensCategoria = itens.filter(item => (item.categoria || "Geral") === categoriaAtual);
