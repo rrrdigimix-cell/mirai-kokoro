@@ -37,6 +37,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -45,4 +46,89 @@
       projectId: "mirai-kokoro",
       storageBucket: "mirai-kokoro.firebasestorage.app",
       messagingSenderId: "601277675162",
-      appId:
+      appId: "1:601277675162:web:b2ab41cbb4709b008a9123"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const TIPO = "Material (PDF)";
+    const NOME_PLURAL = "materiais";
+    const COR = "#4F7A6A";
+
+    const params = new URLSearchParams(window.location.search);
+    const categoriaAtual = params.get("categoria");
+    const lista = document.getElementById("lista");
+    const subtitulo = document.getElementById("subtitulo");
+    const cabecalho = document.getElementById("cabecalho");
+    const tituloPagina = document.getElementById("titulo-pagina");
+
+    async function carregar() {
+      const q = query(collection(db, "conteudo"), where("tipo", "==", TIPO));
+      const snap = await getDocs(q);
+      const itens = [];
+      snap.forEach(doc => itens.push(doc.data()));
+
+      if (!categoriaAtual) {
+        cabecalho.onclick = () => window.location.href = "home.html";
+        tituloPagina.textContent = "Materiais";
+        subtitulo.textContent = itens.length ? "escolha uma categoria" : "";
+
+        const categorias = {};
+        itens.forEach(item => {
+          const cat = item.categoria || "Geral";
+          categorias[cat] = (categorias[cat] || 0) + 1;
+        });
+
+        lista.innerHTML = "";
+        Object.keys(categorias).forEach(cat => {
+          lista.innerHTML += `<a href="?categoria=${encodeURIComponent(cat)}" style="text-decoration:none;">
+            <div style="display:flex; align-items:center; gap:14px; background:#FFFFFF; border-radius:14px; padding:16px; box-shadow:0 4px 16px rgba(27,42,74,0.07); box-sizing:border-box;">
+              <div style="min-width:44px; height:44px; border-radius:12px; background:${COR}; display:flex; align-items:center; justify-content:center;">
+                <i class="ti ti-folder" style="font-size:20px; color:#FFFFFF;"></i>
+              </div>
+              <div style="flex:1;">
+                <p style="font-size:15px; font-weight:600; color:#1B2A4A; margin:0;">${cat}</p>
+                <p style="font-size:12px; color:#79778E; margin:2px 0 0;">${categorias[cat]} ${categorias[cat] === 1 ? NOME_PLURAL.slice(0, -1) : NOME_PLURAL}</p>
+              </div>
+              <i class="ti ti-chevron-right" style="font-size:18px; color:#C9C5B8;"></i>
+            </div></a>`;
+        });
+
+        if (itens.length === 0) {
+          lista.innerHTML = `<div style="border:1.5px dashed #D8D4C8; border-radius:14px; padding:20px; text-align:center; box-sizing:border-box;">
+            <i class="ti ti-clock" style="font-size:18px; color:#B8B4A6;"></i>
+            <p style="font-size:12.5px; color:#918D7E; margin:6px 0 0;">nenhum conteúdo publicado ainda</p></div>`;
+        }
+      } else {
+        cabecalho.onclick = () => window.location.href = "materiais.html";
+        tituloPagina.textContent = categoriaAtual;
+        subtitulo.textContent = "";
+        const itensCategoria = itens.filter(item => (item.categoria || "Geral") === categoriaAtual);
+
+        lista.innerHTML = "";
+        itensCategoria.forEach(item => {
+          lista.innerHTML += `<a href="${item.link}" target="_blank" style="text-decoration:none;">
+            <div style="display:flex; align-items:center; gap:12px; background:#FFFFFF; border-radius:14px; padding:16px; box-shadow:0 4px 16px rgba(27,42,74,0.07); box-sizing:border-box;">
+              <i class="ti ti-file-text" style="font-size:20px; color:${COR};"></i>
+              <p style="flex:1; font-size:14px; font-weight:600; color:#1B2A4A; margin:0;">${item.titulo}</p>
+              <i class="ti ti-external-link" style="color:#C9C5B8;"></i>
+            </div></a>`;
+        });
+
+        if (itensCategoria.length === 0) {
+          lista.innerHTML = `<p style="font-size:12.5px; color:#918D7E;">nenhum item nessa categoria ainda.</p>`;
+        }
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        carregar();
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+</body>
+</html>
