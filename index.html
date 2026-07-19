@@ -17,7 +17,7 @@
         <p style="font-size:11px; color:#79778E; margin:0 0 4px; font-weight:600;">SENHA</p>
         <input id="campo-senha" type="password" placeholder="••••••••" style="width:100%; box-sizing:border-box; background:#F7F6F2; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
       </div>
-      <p id="mensagem-erro" style="font-size:12px; color:#B23A3A; text-align:center; margin:0; display:none;">E-mail ou senha incorretos.</p>
+      <p id="mensagem-erro" style="font-size:12px; color:#B23A3A; text-align:center; margin:0; display:none;"></p>
       <div style="text-align:center;">
         <button id="botao-entrar" style="width:50%; margin-top:6px; height:44px; border-radius:9px; background:#1B2A4A; border:none; color:#FFFFFF; font-size:14px; font-weight:600; cursor:pointer;">ENTRAR</button>
       </div>
@@ -31,7 +31,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCuUQi_s4v0Iat3FkzEfY06lX1NIaDAJ3Y",
@@ -44,19 +45,56 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const UID_ADMIN = "4jnMbmwV2JbSmKkzcJLBum7ybyK2";
+    const UM_ANO_EM_MS = 365 * 24 * 60 * 60 * 1000;
 
     document.getElementById("botao-entrar").addEventListener("click", function () {
       const email = document.getElementById("campo-email").value;
       const senha = document.getElementById("campo-senha").value;
       const mensagemErro = document.getElementById("mensagem-erro");
-
       mensagemErro.style.display = "none";
 
       signInWithEmailAndPassword(auth, email, senha)
-        .then(function () {
-          window.location.href = "home.html";
+        .then(async function (resultado) {
+          const uid = resultado.user.uid;
+
+          // Administradora entra direto, sem checagem de prazo
+          if (uid === UID_ADMIN) {
+            window.location.href = "home.html";
+            return;
+          }
+
+          const refCliente = doc(db, "clientes", uid);
+          const snapCliente = await getDoc(refCliente);
+
+          if (!snapCliente.exists()) {
+            // Primeiro acesso deste cliente: grava a data de início
+            await setDoc(refCliente, {
+              email: email,
+              primeiroAcesso: serverTimestamp()
+            });
+            window.location.href = "home.html";
+          } else {
+            const dados = snapCliente.data();
+            if (dados.primeiroAcesso) {
+              const dataInicio = dados.primeiroAcesso.toDate();
+              const agora = new Date();
+              const diferencaMs = agora.getTime() - dataInicio.getTime();
+
+              if (diferencaMs > UM_ANO_EM_MS) {
+                await signOut(auth);
+                mensagemErro.textContent = "Seu acesso de 1 ano expirou. Entre em contato com a Thais para renovar.";
+                mensagemErro.style.display = "block";
+                return;
+              }
+            }
+            window.location.href = "home.html";
+          }
         })
         .catch(function () {
+          mensagemErro.textContent = "E-mail ou senha incorretos.";
           mensagemErro.style.display = "block";
         });
     });
