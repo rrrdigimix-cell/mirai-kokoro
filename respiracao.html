@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mirai Kokoro - Respiração</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Inter',sans-serif; display:flex; justify-content:center; min-height:100vh; }
+  .app { width:100%; max-width:420px; min-height:100vh; position:relative; }
+  .fundo-foto { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; background-image:url('fundo-respiracao.jpg'); background-size:cover; background-position:center; max-width:420px; margin:0 auto; }
+  .camada-clareamento { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(250,249,246,0.28); z-index:1; max-width:420px; margin:0 auto; }
+  .conteudo { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:20px 18px; box-sizing:border-box; }
+  .voltar { display:flex; align-items:center; gap:10px; margin-bottom:8px; width:100%; cursor:pointer; text-decoration:none; }
+  .abas-tecnica { display:flex; gap:6px; margin-bottom:14px; width:100%; }
+  .aba-tecnica { flex:1; text-align:center; padding:8px 4px; border-radius:9px; font-size:11px; font-weight:600; cursor:pointer; color:#8A8560; background:rgba(240,238,230,0.92); }
+  .aba-tecnica.ativa { background:#1B2A4A; color:#FFFFFF; }
+  .palco { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; }
+  .circulo-fixo { width:210px; height:210px; border-radius:50%; border:6px solid #17171A; position:relative; background:rgba(255,255,255,0.4); }
+  .balao { width:60px; height:60px; border-radius:50%; background:#4F7A6A; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1); }
+  .numero { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:32px; font-weight:600; color:#17171A; font-family:'Playfair Display',serif;
+    text-shadow: 0 0 8px #FFFFFF, 0 0 12px #FFFFFF, 0 0 16px #FFFFFF, 0 0 4px #FFFFFF; }
+  .fase-texto { font-size:15px; color:#1B2A4A; font-weight:600; margin-top:18px; letter-spacing:0.5px; background:rgba(255,255,255,0.55); padding:2px 12px; border-radius:10px; }
+  .ciclos-texto { font-size:12px; color:#2E2B22; margin-top:16px; font-weight:600; background:rgba(255,255,255,0.55); padding:2px 10px; border-radius:8px; }
+  .cronometro { font-size:20px; color:#1B2A4A; margin-top:6px; font-family:'Playfair Display',serif; font-weight:700; background:rgba(255,255,255,0.55); padding:2px 14px; border-radius:10px; }
+  .controles { display:flex; gap:10px; margin-top:22px; }
+  .botao-controle { border:none; border-radius:22px; padding:11px 20px; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .botao-principal { background:#1B2A4A; color:#fff; }
+  .botao-secundario { background:rgba(255,255,255,0.92); color:#1B2A4A; border:1px solid #D8D4C8; }
+  .nav-inferior { width:100%; display:flex; justify-content:space-around; border-top:1px solid rgba(228,225,216,0.8); margin-top:20px; padding-top:14px; background:rgba(255,255,255,0.55); border-radius:14px 14px 0 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="fundo-foto"></div>
+  <div class="camada-clareamento"></div>
+
+  <div class="conteudo">
+
+    <a href="home.html" class="voltar">
+      <i class="ti ti-arrow-left" style="color:#1B2A4A;"></i>
+      <p style="font-family:'Playfair Display',serif; font-weight:700; font-size:18px; color:#1B2A4A; margin:0; background:rgba(255,255,255,0.55); padding:2px 10px; border-radius:8px;">Respiração guiada</p>
+    </a>
+
+    <div class="abas-tecnica">
+      <div class="aba-tecnica ativa" data-tecnica="478" onclick="selecionarTecnica('478', this)">4-7-8</div>
+      <div class="aba-tecnica" data-tecnica="box" onclick="selecionarTecnica('box', this)">Quadrada 4-4-4-4</div>
+      <div class="aba-tecnica" data-tecnica="calma" onclick="selecionarTecnica('calma', this)">Calma 4-6</div>
+    </div>
+
+    <div class="palco">
+      <div class="circulo-fixo">
+        <div class="balao" id="balao"></div>
+        <span class="numero" id="numero">4</span>
+      </div>
+      <p class="fase-texto" id="fase-texto">toque em iniciar</p>
+      <p class="ciclos-texto" id="ciclos-texto">ciclos completos: 0</p>
+      <p class="cronometro" id="cronometro">00:00</p>
+
+      <div class="controles">
+        <button class="botao-controle botao-secundario" onclick="reiniciar()"><i class="ti ti-refresh" style="font-size:15px;"></i> Reiniciar</button>
+        <button class="botao-controle botao-principal" id="botao-iniciar" onclick="alternar()"><i class="ti ti-player-play" style="font-size:15px;"></i> Iniciar</button>
+      </div>
+    </div>
+
+    <div class="nav-inferior">
+      <a href="home.html" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <i class="ti ti-home" style="font-size:20px; color:#C9C5B8;"></i>
+        <span style="font-size:10px; color:#8A8560;">início</span>
+      </a>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <i class="ti ti-bell" style="font-size:20px; color:#C9C5B8;"></i>
+        <span style="font-size:10px; color:#8A8560;">avisos</span>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <i class="ti ti-user" style="font-size:20px; color:#C9C5B8;"></i>
+        <span style="font-size:10px; color:#8A8560;">perfil</span>
+      </div>
+      <div id="botao-sair" style="display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer;">
+        <i class="ti ti-logout" style="font-size:20px; color:#B23A3A;"></i>
+        <span style="font-size:10px; color:#B23A3A;">sair</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuUQi_s4v0Iat3FkzEfY06lX1NIaDAJ3Y",
+    authDomain: "mirai-kokoro.firebaseapp.com",
+    projectId: "mirai-kokoro",
+    storageBucket: "mirai-kokoro.firebasestorage.app",
+    messagingSenderId: "601277675162",
+    appId: "1:601277675162:web:b2ab41cbb4709b008a9123"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) window.location.href = "index.html";
+  });
+
+  document.getElementById("botao-sair").addEventListener("click", function () {
+    signOut(auth).then(function () { window.location.href = "index.html"; });
+  });
+
+  const tecnicas = {
+    "478": [ {nome:"Inspire", seg:4, escala:3.3}, {nome:"Segure", seg:7, escala:3.3}, {nome:"Expire", seg:8, escala:0.25} ],
+    "box": [ {nome:"Inspire", seg:4, escala:3.3}, {nome:"Segure", seg:4, escala:3.3}, {nome:"Expire", seg:4, escala:0.25}, {nome:"Segure", seg:4, escala:0.25} ],
+    "calma": [ {nome:"Inspire", seg:4, escala:3.3}, {nome:"Expire", seg:6, escala:0.25} ]
+  };
+
+  let tecnicaAtual = "478";
+  let rodando = false;
+  let timeoutAtivo = null;
+  let intervaloContagem = null;
+  let intervaloCronometro = null;
+  let segundosTotais = 0;
+  let ciclosCompletos = 0;
+  let indiceFaseAtual = 0;
+
+  function formatarCronometro(seg) {
+    const m = Math.floor(seg / 60).toString().padStart(2, "0");
+    const s = (seg % 60).toString().padStart(2, "0");
+    return m + ":" + s;
+  }
+
+  window.selecionarTecnica = function (nome, elemento) {
+    if (rodando) pararTudo();
+    tecnicaAtual = nome;
+    document.querySelectorAll(".aba-tecnica").forEach(a => a.classList.remove("ativa"));
+    elemento.classList.add("ativa");
+    resetarEstadoVisual();
+  };
+
+  function resetarEstadoVisual() {
+    document.getElementById("fase-texto").textContent = "toque em iniciar";
+    document.getElementById("numero").textContent = tecnicas[tecnicaAtual][0].seg;
+    const balao = document.getElementById("balao");
+    balao.style.transition = "none";
+    balao.style.transform = "translate(-50%,-50%) scale(1)";
+  }
+
+  function pararTudo() {
+    rodando = false;
+    clearTimeout(timeoutAtivo);
+    clearInterval(intervaloContagem);
+    clearInterval(intervaloCronometro);
+    document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-play" style="font-size:15px;"></i> Iniciar';
+  }
+
+  window.reiniciar = function () {
+    pararTudo();
+    segundosTotais = 0;
+    ciclosCompletos = 0;
+    indiceFaseAtual = 0;
+    document.getElementById("cronometro").textContent = "00:00";
+    document.getElementById("ciclos-texto").textContent = "ciclos completos: 0";
+    resetarEstadoVisual();
+  };
+
+  window.alternar = function () {
+    if (rodando) {
+      pararTudo();
+    } else {
+      rodando = true;
+      document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-pause" style="font-size:15px;"></i> Pausar';
+      intervaloCronometro = setInterval(() => {
+        segundosTotais++;
+        document.getElementById("cronometro").textContent = formatarCronometro(segundosTotais);
+      }, 1000);
+      executarFase(indiceFaseAtual);
+    }
+  };
+
+  function executarFase(indice) {
+    if (!rodando) return;
+    const passos = tecnicas[tecnicaAtual];
+
+    if (indice > 0 && indice % passos.length === 0) {
+      ciclosCompletos++;
+      document.getElementById("ciclos-texto").textContent = "ciclos completos: " + ciclosCompletos;
+    }
+
+    indiceFaseAtual = indice;
+    const passo = passos[indice % passos.length];
+    const balao = document.getElementById("balao");
+    const numero = document.getElementById("numero");
+    const faseTexto = document.getElementById("fase-texto");
+
+    faseTexto.textContent = passo.nome;
+    balao.style.transition = "transform " + passo.seg + "s linear";
+    void balao.offsetHeight;
+    balao.style.transform = "translate(-50%,-50%) scale(" + passo.escala + ")";
+
+    let restante = passo.seg;
+    numero.textContent = restante;
+    clearInterval(intervaloContagem);
+    intervaloContagem = setInterval(() => {
+      restante--;
+      if (restante > 0) numero.textContent = restante;
+    }, 1000);
+
+    timeoutAtivo = setTimeout(() => {
+      executarFase(indice + 1);
+    }, passo.seg * 1000);
+  }
+</script>
+
+</body>
+</html>
