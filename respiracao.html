@@ -27,16 +27,21 @@
   .anel-espera circle { fill:none; stroke:#FFFFFF; stroke-width:4; stroke-linecap:round; }
   .circulo-fixo { width:210px; height:210px; border-radius:50%; border:3px solid #BEE3F5; position:relative;
     box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 5px #BEE3F5, 0 8px 20px rgba(20,30,45,0.18);
-    background:rgba(255,255,255,0.25); overflow:hidden; }
-  .balao { width:60px; height:60px; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1);
+    background:rgba(255,255,255,0.25); }
+  .balao-fixo { position:absolute; top:3px; left:3px; width:204px; height:204px; border-radius:50%;
     background-image: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url('fundo-respiracao.png');
     background-attachment: scroll, fixed;
     background-size: cover, cover;
-    background-position: center, center; }
+    background-position: center, center;
+    clip-path: circle(8px at 50% 50%);
+  }
+  .ponteiro-wrapper { position:absolute; top:3px; left:3px; width:204px; height:204px; opacity:0; transform:rotate(0deg); pointer-events:none; z-index:3; }
+  .ponteiro-bolinha { position:absolute; top:-3px; left:50%; transform:translateX(-50%); width:16px; height:16px; border-radius:50%;
+    background:#FFFFFF; border:2px solid #BEE3F5; box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 2px 5px rgba(20,30,45,0.25); }
   .numero { position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); font-size:42px; font-weight:600; color:#17171A; font-family:'Playfair Display',serif;
-    text-shadow: 0 0 8px #FFFFFF, 0 0 12px #FFFFFF, 0 0 18px #FFFFFF, 0 0 4px #FFFFFF; z-index:3; }
+    text-shadow: 0 0 8px #FFFFFF, 0 0 12px #FFFFFF, 0 0 18px #FFFFFF, 0 0 4px #FFFFFF; z-index:4; }
   .fase-texto { position:absolute; top:67%; left:50%; transform:translate(-50%,-50%); font-size:13px; color:#1B2A4A; font-weight:600; letter-spacing:0.4px;
-    background:rgba(255,255,255,0.65); padding:2px 13px; border-radius:9px; z-index:3; white-space:nowrap; }
+    background:rgba(255,255,255,0.65); padding:2px 13px; border-radius:9px; z-index:4; white-space:nowrap; }
   .ciclos-texto { font-size:12px; color:#2E2B22; margin-top:16px; font-weight:600; background:rgba(255,255,255,0.6); padding:3px 12px; border-radius:8px; }
   .cronometro { font-size:20px; color:#1B2A4A; margin-top:10px; font-family:'Playfair Display',serif; font-weight:700; background:rgba(255,255,255,0.6); padding:2px 14px; border-radius:10px; }
   .controles { display:flex; gap:10px; margin-top:22px; }
@@ -68,7 +73,10 @@
           <circle cx="115" cy="115" r="107"></circle>
         </svg>
         <div class="circulo-fixo">
-          <div class="balao" id="balao"></div>
+          <div class="balao-fixo" id="balao-fixo"></div>
+          <div class="ponteiro-wrapper" id="ponteiro-wrapper">
+            <div class="ponteiro-bolinha"></div>
+          </div>
           <span class="numero" id="numero">4</span>
           <p class="fase-texto" id="fase-texto">toque em iniciar</p>
         </div>
@@ -128,8 +136,8 @@
     "calma": { nomeExibicao: "Calma 4-6", fases: [ {nome:"Inspire", tipo:"inspirar", segundos:4}, {nome:"Expire", tipo:"expirar", segundos:6} ] }
   };
 
-  const ESCALA_INFLAR = 3.3;
-  const ESCALA_ESVAZIAR = 0.25;
+  const RAIO_INFLAR = 99;
+  const RAIO_ESVAZIAR = 8;
   const RAIO_ANEL = 107;
   const CIRCUNFERENCIA = 2 * Math.PI * RAIO_ANEL;
 
@@ -137,6 +145,8 @@
   const circuloAnel = anelEspera.querySelector("circle");
   circuloAnel.style.strokeDasharray = CIRCUNFERENCIA;
   circuloAnel.style.strokeDashoffset = CIRCUNFERENCIA;
+
+  const ponteiroWrapper = document.getElementById("ponteiro-wrapper");
 
   let tecnicas = {};
   let tecnicaAtual = "478";
@@ -148,15 +158,15 @@
   let ciclosCompletos = 0;
   let indiceFaseAtual = 0;
 
-  function construirFasesComEscala(fasesConfig) {
-    let escalaAnterior = ESCALA_ESVAZIAR;
+  function construirFasesComRaio(fasesConfig) {
+    let raioAnterior = RAIO_ESVAZIAR;
     return fasesConfig.map(f => {
-      let escala;
-      if (f.tipo === "inspirar") escala = ESCALA_INFLAR;
-      else if (f.tipo === "expirar") escala = ESCALA_ESVAZIAR;
-      else escala = escalaAnterior;
-      escalaAnterior = escala;
-      return { nome: f.nome, seg: f.segundos, escala: escala, tipo: f.tipo };
+      let raio;
+      if (f.tipo === "inspirar") raio = RAIO_INFLAR;
+      else if (f.tipo === "expirar") raio = RAIO_ESVAZIAR;
+      else raio = raioAnterior;
+      raioAnterior = raio;
+      return { nome: f.nome, seg: f.segundos, raio: raio, tipo: f.tipo };
     });
   }
 
@@ -165,9 +175,9 @@
       try {
         const snap = await getDoc(doc(db, "respiracao_config", id));
         const dados = snap.exists() ? snap.data() : TECNICAS_PADRAO[id];
-        tecnicas[id] = { nomeExibicao: dados.nomeExibicao, fases: construirFasesComEscala(dados.fases) };
+        tecnicas[id] = { nomeExibicao: dados.nomeExibicao, fases: construirFasesComRaio(dados.fases) };
       } catch (e) {
-        tecnicas[id] = { nomeExibicao: TECNICAS_PADRAO[id].nomeExibicao, fases: construirFasesComEscala(TECNICAS_PADRAO[id].fases) };
+        tecnicas[id] = { nomeExibicao: TECNICAS_PADRAO[id].nomeExibicao, fases: construirFasesComRaio(TECNICAS_PADRAO[id].fases) };
       }
     }
     montarAbas();
@@ -203,10 +213,11 @@
   function resetarEstadoVisual() {
     document.getElementById("fase-texto").textContent = "toque em iniciar";
     document.getElementById("numero").textContent = tecnicas[tecnicaAtual].fases[0].seg;
-    const balao = document.getElementById("balao");
-    balao.style.transition = "none";
-    balao.style.transform = "translate(-50%,-50%) scale(1)";
+    const balaoFixo = document.getElementById("balao-fixo");
+    balaoFixo.style.transition = "none";
+    balaoFixo.style.clipPath = "circle(1px at 50% 50%)";
     esconderAnel();
+    esconderPonteiro();
   }
 
   function esconderAnel() {
@@ -214,6 +225,12 @@
     anelEspera.style.opacity = "0";
     circuloAnel.style.transition = "none";
     circuloAnel.style.strokeDashoffset = CIRCUNFERENCIA;
+  }
+
+  function esconderPonteiro() {
+    ponteiroWrapper.style.transition = "none";
+    ponteiroWrapper.style.opacity = "0";
+    ponteiroWrapper.style.transform = "rotate(0deg)";
   }
 
   function pararTudo() {
@@ -259,14 +276,14 @@
 
     indiceFaseAtual = indice;
     const passo = passos[indice % passos.length];
-    const balao = document.getElementById("balao");
+    const balaoFixo = document.getElementById("balao-fixo");
     const numero = document.getElementById("numero");
     const faseTexto = document.getElementById("fase-texto");
 
     faseTexto.textContent = passo.nome;
-    balao.style.transition = "transform " + passo.seg + "s linear";
-    void balao.offsetHeight;
-    balao.style.transform = "translate(-50%,-50%) scale(" + passo.escala + ")";
+    balaoFixo.style.transition = "clip-path " + passo.seg + "s linear";
+    void balaoFixo.offsetHeight;
+    balaoFixo.style.clipPath = "circle(" + passo.raio + "px at 50% 50%)";
 
     if (passo.tipo === "manter") {
       anelEspera.style.transition = "none";
@@ -276,8 +293,16 @@
       void circuloAnel.getBoundingClientRect();
       circuloAnel.style.transition = "stroke-dashoffset " + passo.seg + "s linear";
       circuloAnel.style.strokeDashoffset = 0;
+
+      ponteiroWrapper.style.transition = "none";
+      ponteiroWrapper.style.opacity = "1";
+      ponteiroWrapper.style.transform = "rotate(0deg)";
+      void ponteiroWrapper.offsetHeight;
+      ponteiroWrapper.style.transition = "transform " + passo.seg + "s linear";
+      ponteiroWrapper.style.transform = "rotate(360deg)";
     } else {
       esconderAnel();
+      esconderPonteiro();
     }
 
     let restante = passo.seg;
