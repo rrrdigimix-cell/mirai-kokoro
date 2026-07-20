@@ -28,16 +28,21 @@
   .circulo-fixo { width:210px; height:210px; border-radius:50%; border:3px solid #BEE3F5; position:relative;
     box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 5px #BEE3F5, 0 8px 20px rgba(20,30,45,0.18);
     background:rgba(255,255,255,0.25); }
+  
+  /* Efeito de inflar/desinflar mais claro/branco para dar destaque no fundo */
   .balao-fixo { position:absolute; top:3px; left:3px; width:204px; height:204px; border-radius:50%;
-    background-image: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url('fundo-respiracao.png');
+    background-image: linear-gradient(rgba(255,255,255,0.20), rgba(255,255,255,0.20)), url('fundo-respiracao.png');
     background-attachment: scroll, fixed;
     background-size: cover, cover;
     background-position: center, center;
     clip-path: circle(8px at 50% 50%);
   }
-  .ponteiro-wrapper { position:absolute; top:3px; left:3px; width:204px; height:204px; opacity:0; transform:rotate(0deg); pointer-events:none; z-index:3; }
-  .ponteiro-bolinha { position:absolute; top:-3px; left:50%; transform:translateX(-50%); width:16px; height:16px; border-radius:50%;
-    background:#FFFFFF; border:2px solid #BEE3F5; box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 2px 5px rgba(20,30,45,0.25); }
+
+  /* Bolinha maior e perfeitamente centralizada sobre a linha do circulo */
+  .ponteiro-wrapper { position:absolute; top:-2px; left:-2px; width:214px; height:214px; opacity:0; transform:rotate(0deg); pointer-events:none; z-index:3; }
+  .ponteiro-bolinha { position:absolute; top:-13px; left:50%; margin-left:-13px; width:26px; height:26px; border-radius:50%;
+    background:#FFFFFF; border:3px solid #BEE3F5; box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 2px 6px rgba(20,30,45,0.3); }
+
   .numero { position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); font-size:42px; font-weight:600; color:#17171A; font-family:'Playfair Display',serif;
     text-shadow: 0 0 8px #FFFFFF, 0 0 12px #FFFFFF, 0 0 18px #FFFFFF, 0 0 4px #FFFFFF; z-index:4; }
   .fase-texto { position:absolute; top:67%; left:50%; transform:translate(-50%,-50%); font-size:13px; color:#1B2A4A; font-weight:600; letter-spacing:0.4px;
@@ -215,7 +220,7 @@
     document.getElementById("numero").textContent = tecnicas[tecnicaAtual].fases[0].seg;
     const balaoFixo = document.getElementById("balao-fixo");
     balaoFixo.style.transition = "none";
-    balaoFixo.style.clipPath = "circle(1px at 50% 50%)";
+    balaoFixo.style.clipPath = "circle(8px at 50% 50%)";
     esconderAnel();
     esconderPonteiro();
   }
@@ -233,12 +238,26 @@
     ponteiroWrapper.style.transform = "rotate(0deg)";
   }
 
+  /* Parar tudo congela a animação exatamente onde estava quando clicado em Pausar */
   function pararTudo() {
     rodando = false;
     clearTimeout(timeoutAtivo);
     clearInterval(intervaloContagem);
     clearInterval(intervaloCronometro);
     document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-play" style="font-size:15px;"></i> Iniciar';
+
+    const balaoFixo = document.getElementById("balao-fixo");
+    const clipPathAtual = window.getComputedStyle(balaoFixo).clipPath;
+    balaoFixo.style.transition = "none";
+    balaoFixo.style.clipPath = clipPathAtual;
+
+    const transformPonteiro = window.getComputedStyle(ponteiroWrapper).transform;
+    ponteiroWrapper.style.transition = "none";
+    ponteiroWrapper.style.transform = transformPonteiro;
+
+    const strokeDashoffsetAnel = window.getComputedStyle(circuloAnel).strokeDashoffset;
+    circuloAnel.style.transition = "none";
+    circuloAnel.style.strokeDashoffset = strokeDashoffsetAnel;
   }
 
   window.reiniciar = function () {
