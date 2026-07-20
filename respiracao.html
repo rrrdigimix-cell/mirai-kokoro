@@ -27,18 +27,18 @@
   .anel-espera circle { fill:none; stroke:#FFFFFF; stroke-width:4; stroke-linecap:round; }
   .circulo-fixo { width:210px; height:210px; border-radius:50%; border:3px solid #BEE3F5; position:relative;
     box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 5px #BEE3F5, 0 8px 20px rgba(20,30,45,0.18);
-    background:rgba(255,255,255,0.25); }
+    background:rgba(255,255,255,0.10); overflow:hidden; }
   
-  /* Efeito de inflar/desinflar mais claro/branco para dar destaque no fundo */
-  .balao-fixo { position:absolute; top:3px; left:3px; width:204px; height:204px; border-radius:50%;
-    background-image: linear-gradient(rgba(255,255,255,0.20), rgba(255,255,255,0.20)), url('fundo-respiracao.png');
-    background-attachment: scroll, fixed;
-    background-size: cover, cover;
-    background-position: center, center;
+  /* Balão alterado para efeito de iluminação no fundo real (sem desalinhar a imagem) */
+  .balao-fixo { position:absolute; top:0; left:0; width:204px; height:204px; border-radius:50%;
+    background: rgba(255, 255, 255, 0.38);
+    backdrop-filter: brightness(1.25) contrast(1.05);
+    -webkit-backdrop-filter: brightness(1.25) contrast(1.05);
     clip-path: circle(8px at 50% 50%);
+    box-shadow: inset 0 0 15px rgba(255,255,255,0.6);
   }
 
-  /* Bolinha maior e perfeitamente centralizada sobre a linha do circulo */
+  /* Bolinha do ponteiro */
   .ponteiro-wrapper { position:absolute; top:-2px; left:-2px; width:214px; height:214px; opacity:0; transform:rotate(0deg); pointer-events:none; z-index:3; }
   .ponteiro-bolinha { position:absolute; top:-13px; left:50%; margin-left:-13px; width:26px; height:26px; border-radius:50%;
     background:#FFFFFF; border:3px solid #BEE3F5; box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 2px 6px rgba(20,30,45,0.3); }
@@ -238,7 +238,6 @@
     ponteiroWrapper.style.transform = "rotate(0deg)";
   }
 
-  /* Parar tudo congela a animação exatamente onde estava quando clicado em Pausar */
   function pararTudo() {
     rodando = false;
     clearTimeout(timeoutAtivo);
