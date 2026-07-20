@@ -23,29 +23,26 @@
   .aba-tecnica.ativa { background:#1B2A4A; color:#FFFFFF; }
   .palco { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; }
   .aro-espera-container { width:230px; height:230px; position:relative; display:flex; align-items:center; justify-content:center; }
-  .anel-espera { position:absolute; top:0; left:0; width:100%; height:100%; transform:rotate(-90deg); opacity:0; z-index:4; }
+  .anel-espera { position:absolute; top:0; left:0; width:100%; height:100%; transform:rotate(-90deg); opacity:0; }
   .anel-espera circle { fill:none; stroke:#FFFFFF; stroke-width:4; stroke-linecap:round; }
   .circulo-fixo { width:210px; height:210px; border-radius:50%; border:3px solid #BEE3F5; position:relative;
     box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 5px #BEE3F5, 0 8px 20px rgba(20,30,45,0.18);
     background:rgba(255,255,255,0.25); }
-  
-  /* Balão perfeitamente alinhado com o fundo original e efeito mais branco */
   .balao-fixo { position:absolute; top:3px; left:3px; width:204px; height:204px; border-radius:50%;
-    background-image: linear-gradient(rgba(255,255,255,0.70), rgba(255,255,255,0.70)), url('fundo-respiracao.png');
-    background-size: 420px 100dvh;
-    background-position: center center;
+    background-image: linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)), url('fundo-respiracao.png');
+    background-attachment: scroll, fixed;
+    background-size: cover, cover;
+    background-position: center, center;
     clip-path: circle(8px at 50% 50%);
   }
-
-  /* Bolinha maior e garantida por CIMA do aro (z-index: 10) */
-  .ponteiro-wrapper { position:absolute; top:-3px; left:-3px; width:210px; height:210px; opacity:0; transform:rotate(0deg); pointer-events:none; z-index:10; }
-  .ponteiro-bolinha { position:absolute; top:-13px; left:50%; margin-left:-13px; width:26px; height:26px; border-radius:50%;
-    background:#FFFFFF; border:3px solid #BEE3F5; box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 2px 6px rgba(20,30,45,0.3); }
-
+  .ponteiro-wrapper { position:absolute; top:3px; left:3px; width:204px; height:204px; opacity:0; transform:rotate(0deg); pointer-events:none; z-index:3; }
+  .ponteiro-bolinha { position:absolute; top:50%; left:50%; width:36px; height:36px; margin-top:-18px; margin-left:-18px;
+    transform: translateY(-105px); border-radius:50%;
+    background:#FFFFFF; border:2px solid #BEE3F5; box-shadow:0 0 0 2px rgba(255,255,255,0.9), 0 2px 6px rgba(20,30,45,0.3); }
   .numero { position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); font-size:42px; font-weight:600; color:#17171A; font-family:'Playfair Display',serif;
-    text-shadow: 0 0 8px #FFFFFF, 0 0 12px #FFFFFF, 0 0 18px #FFFFFF, 0 0 4px #FFFFFF; z-index:5; }
+    text-shadow: 0 0 8px #FFFFFF, 0 0 12px #FFFFFF, 0 0 18px #FFFFFF, 0 0 4px #FFFFFF; z-index:4; }
   .fase-texto { position:absolute; top:67%; left:50%; transform:translate(-50%,-50%); font-size:13px; color:#1B2A4A; font-weight:600; letter-spacing:0.4px;
-    background:rgba(255,255,255,0.65); padding:2px 13px; border-radius:9px; z-index:5; white-space:nowrap; }
+    background:rgba(255,255,255,0.65); padding:2px 13px; border-radius:9px; z-index:4; white-space:nowrap; }
   .ciclos-texto { font-size:12px; color:#2E2B22; margin-top:16px; font-weight:600; background:rgba(255,255,255,0.6); padding:3px 12px; border-radius:8px; }
   .cronometro { font-size:20px; color:#1B2A4A; margin-top:10px; font-family:'Playfair Display',serif; font-weight:700; background:rgba(255,255,255,0.6); padding:2px 14px; border-radius:10px; }
   .controles { display:flex; gap:10px; margin-top:22px; }
@@ -151,16 +148,25 @@
   circuloAnel.style.strokeDashoffset = CIRCUNFERENCIA;
 
   const ponteiroWrapper = document.getElementById("ponteiro-wrapper");
+  const balaoFixo = document.getElementById("balao-fixo");
+  const numero = document.getElementById("numero");
+  const faseTexto = document.getElementById("fase-texto");
 
   let tecnicas = {};
   let tecnicaAtual = "478";
   let rodando = false;
+  let faseIniciada = false;
   let timeoutAtivo = null;
   let intervaloContagem = null;
   let intervaloCronometro = null;
   let segundosTotais = 0;
   let ciclosCompletos = 0;
   let indiceFaseAtual = 0;
+
+  let passoAtualObj = null;
+  let restanteSegundos = 0;
+  let duracaoRestanteMs = 0;
+  let inicioFaseMs = 0;
 
   function construirFasesComRaio(fasesConfig) {
     let raioAnterior = RAIO_ESVAZIAR;
@@ -207,7 +213,7 @@
   }
 
   function selecionarTecnica(id, elemento) {
-    if (rodando) pararTudo();
+    if (rodando || faseIniciada) pararTudo();
     tecnicaAtual = id;
     document.querySelectorAll(".aba-tecnica").forEach(a => a.classList.remove("ativa"));
     elemento.classList.add("ativa");
@@ -215,11 +221,10 @@
   }
 
   function resetarEstadoVisual() {
-    document.getElementById("fase-texto").textContent = "toque em iniciar";
-    document.getElementById("numero").textContent = tecnicas[tecnicaAtual].fases[0].seg;
-    const balaoFixo = document.getElementById("balao-fixo");
+    faseTexto.textContent = "toque em iniciar";
+    numero.textContent = tecnicas[tecnicaAtual].fases[0].seg;
     balaoFixo.style.transition = "none";
-    balaoFixo.style.clipPath = "circle(8px at 50% 50%)";
+    balaoFixo.style.clipPath = "circle(1px at 50% 50%)";
     esconderAnel();
     esconderPonteiro();
   }
@@ -237,25 +242,41 @@
     ponteiroWrapper.style.transform = "rotate(0deg)";
   }
 
+  function obterAnguloRotacao(el) {
+    const transformStr = getComputedStyle(el).transform;
+    if (transformStr === "none") return 0;
+    const match = transformStr.match(/matrix\(([^)]+)\)/);
+    if (!match) return 0;
+    const partes = match[1].split(",").map(Number);
+    const a = partes[0], b = partes[1];
+    let angulo = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+    if (angulo < 0) angulo += 360;
+    return angulo;
+  }
+
+  function congelarAnimacoes() {
+    const clipAtual = getComputedStyle(balaoFixo).clipPath;
+    balaoFixo.style.transition = "none";
+    balaoFixo.style.clipPath = clipAtual;
+
+    if (passoAtualObj && passoAtualObj.tipo === "manter") {
+      const dashAtual = getComputedStyle(circuloAnel).strokeDashoffset;
+      circuloAnel.style.transition = "none";
+      circuloAnel.style.strokeDashoffset = dashAtual;
+
+      const anguloAtual = obterAnguloRotacao(ponteiroWrapper);
+      ponteiroWrapper.style.transition = "none";
+      ponteiroWrapper.style.transform = "rotate(" + anguloAtual + "deg)";
+    }
+  }
+
   function pararTudo() {
     rodando = false;
+    faseIniciada = false;
     clearTimeout(timeoutAtivo);
     clearInterval(intervaloContagem);
     clearInterval(intervaloCronometro);
     document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-play" style="font-size:15px;"></i> Iniciar';
-
-    const balaoFixo = document.getElementById("balao-fixo");
-    const clipPathAtual = window.getComputedStyle(balaoFixo).clipPath;
-    balaoFixo.style.transition = "none";
-    balaoFixo.style.clipPath = clipPathAtual;
-
-    const transformPonteiro = window.getComputedStyle(ponteiroWrapper).transform;
-    ponteiroWrapper.style.transition = "none";
-    ponteiroWrapper.style.transform = transformPonteiro;
-
-    const strokeDashoffsetAnel = window.getComputedStyle(circuloAnel).strokeDashoffset;
-    circuloAnel.style.transition = "none";
-    circuloAnel.style.strokeDashoffset = strokeDashoffsetAnel;
   }
 
   window.reiniciar = function () {
@@ -263,6 +284,9 @@
     segundosTotais = 0;
     ciclosCompletos = 0;
     indiceFaseAtual = 0;
+    passoAtualObj = null;
+    restanteSegundos = 0;
+    duracaoRestanteMs = 0;
     document.getElementById("cronometro").textContent = "00:00";
     document.getElementById("ciclos-texto").textContent = "ciclos: 0";
     resetarEstadoVisual();
@@ -270,7 +294,14 @@
 
   window.alternar = function () {
     if (rodando) {
-      pararTudo();
+      rodando = false;
+      const decorrido = Date.now() - inicioFaseMs;
+      duracaoRestanteMs = Math.max(0, duracaoRestanteMs - decorrido);
+      congelarAnimacoes();
+      clearTimeout(timeoutAtivo);
+      clearInterval(intervaloContagem);
+      clearInterval(intervaloCronometro);
+      document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-play" style="font-size:15px;"></i> Iniciar';
     } else {
       rodando = true;
       document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-pause" style="font-size:15px;"></i> Pausar';
@@ -278,61 +309,76 @@
         segundosTotais++;
         document.getElementById("cronometro").textContent = formatarCronometro(segundosTotais);
       }, 1000);
-      executarFase(indiceFaseAtual);
+
+      if (faseIniciada) {
+        executarFase(indiceFaseAtual, true);
+      } else {
+        faseIniciada = true;
+        executarFase(0, false);
+      }
     }
   };
 
-  function executarFase(indice) {
+  function executarFase(indice, retomando) {
     if (!rodando) return;
     const passos = tecnicas[tecnicaAtual].fases;
 
-    if (indice > 0 && indice % passos.length === 0) {
-      ciclosCompletos++;
-      document.getElementById("ciclos-texto").textContent = "ciclos: " + ciclosCompletos;
+    if (!retomando) {
+      if (indice > 0 && indice % passos.length === 0) {
+        ciclosCompletos++;
+        document.getElementById("ciclos-texto").textContent = "ciclos: " + ciclosCompletos;
+      }
+      indiceFaseAtual = indice;
+      passoAtualObj = passos[indice % passos.length];
+      duracaoRestanteMs = passoAtualObj.seg * 1000;
+      restanteSegundos = passoAtualObj.seg;
     }
 
-    indiceFaseAtual = indice;
-    const passo = passos[indice % passos.length];
-    const balaoFixo = document.getElementById("balao-fixo");
-    const numero = document.getElementById("numero");
-    const faseTexto = document.getElementById("fase-texto");
+    const passo = passoAtualObj;
+    const duracaoSeg = duracaoRestanteMs / 1000;
 
     faseTexto.textContent = passo.nome;
-    balaoFixo.style.transition = "clip-path " + passo.seg + "s linear";
+    numero.textContent = restanteSegundos;
+
+    balaoFixo.style.transition = "clip-path " + duracaoSeg + "s linear";
     void balaoFixo.offsetHeight;
     balaoFixo.style.clipPath = "circle(" + passo.raio + "px at 50% 50%)";
 
     if (passo.tipo === "manter") {
-      anelEspera.style.transition = "none";
-      anelEspera.style.opacity = "1";
-      circuloAnel.style.transition = "none";
-      circuloAnel.style.strokeDashoffset = CIRCUNFERENCIA;
-      void circuloAnel.getBoundingClientRect();
-      circuloAnel.style.transition = "stroke-dashoffset " + passo.seg + "s linear";
+      if (!retomando) {
+        anelEspera.style.transition = "none";
+        anelEspera.style.opacity = "1";
+        circuloAnel.style.transition = "none";
+        circuloAnel.style.strokeDashoffset = CIRCUNFERENCIA;
+        void circuloAnel.getBoundingClientRect();
+
+        ponteiroWrapper.style.transition = "none";
+        ponteiroWrapper.style.opacity = "1";
+        ponteiroWrapper.style.transform = "rotate(0deg)";
+        void ponteiroWrapper.offsetHeight;
+      }
+      circuloAnel.style.transition = "stroke-dashoffset " + duracaoSeg + "s linear";
       circuloAnel.style.strokeDashoffset = 0;
 
-      ponteiroWrapper.style.transition = "none";
-      ponteiroWrapper.style.opacity = "1";
-      ponteiroWrapper.style.transform = "rotate(0deg)";
-      void ponteiroWrapper.offsetHeight;
-      ponteiroWrapper.style.transition = "transform " + passo.seg + "s linear";
+      ponteiroWrapper.style.transition = "transform " + duracaoSeg + "s linear";
       ponteiroWrapper.style.transform = "rotate(360deg)";
     } else {
       esconderAnel();
       esconderPonteiro();
     }
 
-    let restante = passo.seg;
-    numero.textContent = restante;
+    inicioFaseMs = Date.now();
+
     clearInterval(intervaloContagem);
     intervaloContagem = setInterval(() => {
-      restante--;
-      if (restante > 0) numero.textContent = restante;
+      restanteSegundos--;
+      if (restanteSegundos > 0) numero.textContent = restanteSegundos;
     }, 1000);
 
+    clearTimeout(timeoutAtivo);
     timeoutAtivo = setTimeout(() => {
-      executarFase(indice + 1);
-    }, passo.seg * 1000);
+      executarFase(indiceFaseAtual + 1, false);
+    }, duracaoRestanteMs);
   }
 
   onAuthStateChanged(auth, (user) => {
