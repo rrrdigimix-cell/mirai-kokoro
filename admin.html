@@ -22,6 +22,7 @@
     <div style="display:flex; gap:8px; margin-bottom:18px;">
       <div id="aba-clientes" onclick="mostrarAba('clientes')" style="flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; color:#FFFFFF; background:#1B2A4A;">Clientes</div>
       <div id="aba-conteudo" onclick="mostrarAba('conteudo')" style="flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; color:#8A8560; background:#F0EEE6;">Conteúdo</div>
+      <div id="aba-contato" onclick="mostrarAba('contato')" style="flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; color:#8A8560; background:#F0EEE6;">Contato</div>
     </div>
 
     <div id="painel-clientes" style="display:flex; flex-direction:column; gap:12px;">
@@ -79,6 +80,20 @@
       <div id="lista-itens-publicados"></div>
     </div>
 
+    <div id="painel-contato" style="display:none; flex-direction:column; gap:12px;">
+      <p style="font-size:13px; color:#1B2A4A; font-weight:600; margin:0;">Informações de contato exibidas no app</p>
+      <div>
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">E-MAIL</p>
+        <input id="input-contato-email" type="email" placeholder="contato@miraikokoro.com" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+      </div>
+      <div>
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">TELEFONE</p>
+        <input id="input-contato-telefone" type="text" placeholder="(00) 00000-0000" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+      </div>
+      <button id="botao-salvar-contato" style="background:#1B2A4A; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; margin-top:6px;">Salvar contato</button>
+      <p id="msg-contato" style="font-size:12px; margin:0; display:none;"></p>
+    </div>
+    
   </div>
 
   <p id="mensagem-acesso-negado" style="display:none; text-align:center; color:#B23A3A; font-size:14px; margin-top:100px;">Acesso restrito. Redirecionando...</p>
@@ -86,7 +101,7 @@
   <script type="module">
     import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCuUQi_s4v0Iat3FkzEfY06lX1NIaDAJ3Y",
@@ -114,22 +129,17 @@
       }
     });
 
-    window.mostrarAba = function (nome) {
-      const painelClientes = document.getElementById("painel-clientes");
-      const painelConteudo = document.getElementById("painel-conteudo");
-      const abaClientes = document.getElementById("aba-clientes");
-      const abaConteudo = document.getElementById("aba-conteudo");
-      if (nome === "clientes") {
-        painelClientes.style.display = "flex";
-        painelConteudo.style.display = "none";
-        abaClientes.style.background = "#1B2A4A"; abaClientes.style.color = "#FFFFFF";
-        abaConteudo.style.background = "#F0EEE6"; abaConteudo.style.color = "#8A8560";
-      } else {
-        painelClientes.style.display = "none";
-        painelConteudo.style.display = "flex";
-        abaConteudo.style.background = "#1B2A4A"; abaConteudo.style.color = "#FFFFFF";
-        abaClientes.style.background = "#F0EEE6"; abaClientes.style.color = "#8A8560";
-      }
+   window.mostrarAba = function (nome) {
+      const paineis = { clientes: document.getElementById("painel-clientes"), conteudo: document.getElementById("painel-conteudo"), contato: document.getElementById("painel-contato") };
+      const abas = { clientes: document.getElementById("aba-clientes"), conteudo: document.getElementById("aba-conteudo"), contato: document.getElementById("aba-contato") };
+
+      Object.keys(paineis).forEach(key => {
+        paineis[key].style.display = (key === nome) ? "flex" : "none";
+        abas[key].style.background = (key === nome) ? "#1B2A4A" : "#F0EEE6";
+        abas[key].style.color = (key === nome) ? "#FFFFFF" : "#8A8560";
+      });
+
+      if (nome === "contato") carregarContatoAdmin();
     };
 
     window.verificarNovaCategoria = function () {
@@ -162,7 +172,42 @@
       window.verificarNovaCategoria();
     }
 
-    async function carregarItensPublicados() {
+    async function carregarItensPublicados() async function carregarContatoAdmin() {
+      try {
+        const snap = await getDoc(doc(db, "configuracoes", "contato"));
+        if (snap.exists()) {
+          const dados = snap.data();
+          document.getElementById("input-contato-email").value = dados.email || "";
+          document.getElementById("input-contato-telefone").value = dados.telefone || "";
+        }
+      } catch (erro) {
+        console.error("Erro ao carregar contato:", erro);
+      }
+    }
+
+    document.getElementById("botao-salvar-contato").addEventListener("click", async function () {
+      const email = document.getElementById("input-contato-email").value.trim();
+      const telefone = document.getElementById("input-contato-telefone").value.trim();
+      const msg = document.getElementById("msg-contato");
+
+      if (!email || !telefone) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Preencha e-mail e telefone antes de salvar.";
+        msg.style.display = "block";
+        return;
+      }
+
+      try {
+        await setDoc(doc(db, "configuracoes", "contato"), { email, telefone, atualizadoEm: serverTimestamp() });
+        msg.style.color = "#3A6650";
+        msg.textContent = "✅ Contato atualizado com sucesso!";
+        msg.style.display = "block";
+      } catch (erro) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Erro ao salvar: " + erro.message;
+        msg.style.display = "block";
+      }
+    });{
       const snap = await getDocs(collection(db, "conteudo"));
       const lista = document.getElementById("lista-itens-publicados");
       lista.innerHTML = "";
