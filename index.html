@@ -51,6 +51,26 @@
 
     const UID_ADMIN = "4jnMbmwV2JbSmKkzcJLBum7ybyK2";
     const UM_ANO_EM_MS = 365 * 24 * 60 * 60 * 1000;
+    async function carregarContato() {
+  try {
+    const contatoRef = doc(db, "configuracoes", "contato");
+    const contatoSnap = await getDoc(contatoRef);
+    const el = document.getElementById("contato-info");
+    if (contatoSnap.exists()) {
+      const dados = contatoSnap.data();
+      const email = dados.email || "contato@miraikokoro.com";
+      const telefone = dados.telefone || "(00) 00000-0000";
+      el.textContent = email + " · " + telefone;
+    } else {
+      el.textContent = "contato@miraikokoro.com · (00) 00000-0000";
+    }
+  } catch (erro) {
+    console.error("Erro ao carregar contato:", erro);
+    document.getElementById("contato-info").textContent = "contato@miraikokoro.com · (00) 00000-0000";
+  }
+}
+
+carregarContato();
 
     document.getElementById("botao-entrar").addEventListener("click", function () {
       const email = document.getElementById("campo-email").value;
