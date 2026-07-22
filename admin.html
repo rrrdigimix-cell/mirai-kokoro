@@ -93,7 +93,7 @@
       <button id="botao-salvar-contato" style="background:#1B2A4A; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; margin-top:6px;">Salvar contato</button>
       <p id="msg-contato" style="font-size:12px; margin:0; display:none;"></p>
     </div>
-    
+
   </div>
 
   <p id="mensagem-acesso-negado" style="display:none; text-align:center; color:#B23A3A; font-size:14px; margin-top:100px;">Acesso restrito. Redirecionando...</p>
@@ -129,7 +129,7 @@
       }
     });
 
-   window.mostrarAba = function (nome) {
+    window.mostrarAba = function (nome) {
       const paineis = { clientes: document.getElementById("painel-clientes"), conteudo: document.getElementById("painel-conteudo"), contato: document.getElementById("painel-contato") };
       const abas = { clientes: document.getElementById("aba-clientes"), conteudo: document.getElementById("aba-conteudo"), contato: document.getElementById("aba-contato") };
 
@@ -173,30 +173,30 @@
     }
 
     async function carregarItensPublicados() {
-  const snap = await getDocs(collection(db, "conteudo"));
-  const lista = document.getElementById("lista-itens-publicados");
-  lista.innerHTML = "";
-  snap.forEach(doc => {
-    const item = doc.data();
-    lista.innerHTML += `<div style="background:#FFFFFF; border-radius:12px; padding:12px 14px; box-shadow:0 3px 10px rgba(27,42,74,0.06); margin-top:8px;">
-      <p style="font-size:12.5px; font-weight:600; margin:0; color:#3A3A3A;">${item.titulo}</p>
-      <p style="font-size:10.5px; color:#918D7E; margin:2px 0 0;">${item.tipo} · ${item.categoria || "Geral"}</p>
-    </div>`;
-  });
-}
-
-async function carregarContatoAdmin() {
-  try {
-    const snap = await getDoc(doc(db, "configuracoes", "contato"));
-    if (snap.exists()) {
-      const dados = snap.data();
-      document.getElementById("input-contato-email").value = dados.email || "";
-      document.getElementById("input-contato-telefone").value = dados.telefone || "";
+      const snap = await getDocs(collection(db, "conteudo"));
+      const lista = document.getElementById("lista-itens-publicados");
+      lista.innerHTML = "";
+      snap.forEach(doc => {
+        const item = doc.data();
+        lista.innerHTML += `<div style="background:#FFFFFF; border-radius:12px; padding:12px 14px; box-shadow:0 3px 10px rgba(27,42,74,0.06); margin-top:8px;">
+          <p style="font-size:12.5px; font-weight:600; margin:0; color:#3A3A3A;">${item.titulo}</p>
+          <p style="font-size:10.5px; color:#918D7E; margin:2px 0 0;">${item.tipo} · ${item.categoria || "Geral"}</p>
+        </div>`;
+      });
     }
-  } catch (erro) {
-    console.error("Erro ao carregar contato:", erro);
-  }
-}
+
+    async function carregarContatoAdmin() {
+      try {
+        const snap = await getDoc(doc(db, "configuracoes", "contato"));
+        if (snap.exists()) {
+          const dados = snap.data();
+          document.getElementById("input-contato-email").value = dados.email || "";
+          document.getElementById("input-contato-telefone").value = dados.telefone || "";
+        }
+      } catch (erro) {
+        console.error("Erro ao carregar contato:", erro);
+      }
+    }
 
     document.getElementById("botao-salvar-contato").addEventListener("click", async function () {
       const email = document.getElementById("input-contato-email").value.trim();
@@ -220,18 +220,7 @@ async function carregarContatoAdmin() {
         msg.textContent = "Erro ao salvar: " + erro.message;
         msg.style.display = "block";
       }
-    });{
-      const snap = await getDocs(collection(db, "conteudo"));
-      const lista = document.getElementById("lista-itens-publicados");
-      lista.innerHTML = "";
-      snap.forEach(doc => {
-        const item = doc.data();
-        lista.innerHTML += `<div style="background:#FFFFFF; border-radius:12px; padding:12px 14px; box-shadow:0 3px 10px rgba(27,42,74,0.06); margin-top:8px;">
-          <p style="font-size:12.5px; font-weight:600; margin:0; color:#3A3A3A;">${item.titulo}</p>
-          <p style="font-size:10.5px; color:#918D7E; margin:2px 0 0;">${item.tipo} · ${item.categoria || "Geral"}</p>
-        </div>`;
-      });
-    }
+    });
 
     document.getElementById("botao-adicionar-conteudo").addEventListener("click", async function () {
       const tipo = document.getElementById("select-tipo").value;
