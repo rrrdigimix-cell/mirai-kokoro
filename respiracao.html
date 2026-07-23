@@ -18,8 +18,8 @@
   .voltar { display:flex; align-items:center; gap:10px; margin-bottom:8px; width:100%; cursor:pointer; text-decoration:none; }
   .titulo-pagina { font-family:'Playfair Display',serif; font-weight:700; font-size:21px; color:#1B2A4A; margin:0;
     text-shadow: 0 1px 4px rgba(255,255,255,0.9), 0 0 10px rgba(255,255,255,0.7); }
-  .abas-tecnica { display:flex; gap:6px; margin-bottom:20px; width:100%; }
-  .aba-tecnica { flex:1; text-align:center; padding:8px 4px; border-radius:9px; font-size:11px; font-weight:600; cursor:pointer; color:#8A8560; background:rgba(240,238,230,0.92); }
+  .abas-tecnica { display:grid; grid-template-columns: repeat(2, 1fr); gap:6px; margin-bottom:20px; width:100%; }
+  .aba-tecnica { text-align:center; padding:7px 4px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; color:#8A8560; background:rgba(240,238,230,0.92); }
   .aba-tecnica.ativa { background:#1B2A4A; color:#FFFFFF; }
   .palco { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; }
   .aro-espera-container { width:230px; height:230px; position:relative; display:flex; align-items:center; justify-content:center; }
@@ -74,13 +74,13 @@
           <circle cx="115" cy="115" r="107"></circle>
         </svg>
         <div class="circulo-fixo">
-          <div class="balao-fixo" id="balao-fixo"></div>
-          <div class="ponteiro-wrapper" id="ponteiro-wrapper">
-            <div class="ponteiro-bolinha"></div>
-          </div>
-          <span class="numero" id="numero">4</span>
-          <p class="fase-texto" id="fase-texto">toque em iniciar</p>
-        </div>
+  <div class="balao-fixo" id="balao-fixo"></div>
+  <span class="numero" id="numero">4</span>
+  <p class="fase-texto" id="fase-texto">toque em iniciar</p>
+</div>
+<div class="ponteiro-wrapper" id="ponteiro-wrapper">
+  <div class="ponteiro-bolinha"></div>
+</div>
       </div>
 
       <p class="ciclos-texto" id="ciclos-texto">ciclos: 0</p>
