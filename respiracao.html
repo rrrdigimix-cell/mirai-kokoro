@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
- <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#4a90d9">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mirai Kokoro - Respiração</title>
@@ -77,11 +75,11 @@
         </svg>
         <div class="circulo-fixo">
           <div class="balao-fixo" id="balao-fixo"></div>
+          <div class="ponteiro-wrapper" id="ponteiro-wrapper">
+            <div class="ponteiro-bolinha"></div>
+          </div>
           <span class="numero" id="numero">4</span>
           <p class="fase-texto" id="fase-texto">toque em iniciar</p>
-        </div>
-        <div class="ponteiro-wrapper" id="ponteiro-wrapper">
-          <div class="ponteiro-bolinha"></div>
         </div>
       </div>
 
@@ -119,7 +117,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCuUQi_s4v0Iat3FkzEfY06lX1NIaDAJ3Y",
@@ -133,11 +131,14 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // Usadas apenas como sementes iniciais, caso ainda não exista nenhuma técnica cadastrada no Firestore.
   const TECNICAS_PADRAO = {
     "478": { nomeExibicao: "4-7-8", fases: [ {nome:"Inspire", tipo:"inspirar", segundos:4}, {nome:"Segure", tipo:"manter", segundos:7}, {nome:"Expire", tipo:"expirar", segundos:8} ] },
     "box": { nomeExibicao: "Quadrada 4-4-4-4", fases: [ {nome:"Inspire", tipo:"inspirar", segundos:4}, {nome:"Segure", tipo:"manter", segundos:4}, {nome:"Expire", tipo:"expirar", segundos:4}, {nome:"Segure", tipo:"manter", segundos:4} ] },
     "calma": { nomeExibicao: "Calma 4-6", fases: [ {nome:"Inspire", tipo:"inspirar", segundos:4}, {nome:"Expire", tipo:"expirar", segundos:6} ] }
   };
+
+  const NOME_FASE = { inspirar: "Inspire", manter: "Segure", expirar: "Expire" };
 
   const RAIO_INFLAR = 112;
   const RAIO_ESVAZIAR = 8;
@@ -178,20 +179,34 @@
       else if (f.tipo === "expirar") raio = RAIO_ESVAZIAR;
       else raio = raioAnterior;
       raioAnterior = raio;
-      return { nome: f.nome, seg: f.segundos, raio: raio, tipo: f.tipo };
+      return { nome: f.nome || NOME_FASE[f.tipo] || f.tipo, seg: f.segundos, raio: raio, tipo: f.tipo };
     });
   }
 
   async function carregarConfiguracoes() {
-    for (const id of Object.keys(TECNICAS_PADRAO)) {
-      try {
-        const snap = await getDoc(doc(db, "respiracao_config", id));
-        const dados = snap.exists() ? snap.data() : TECNICAS_PADRAO[id];
-        tecnicas[id] = { nomeExibicao: dados.nomeExibicao, fases: construirFasesComRaio(dados.fases) };
-      } catch (e) {
+    tecnicas = {};
+    try {
+      const snap = await getDocs(collection(db, "respiracao_config"));
+      if (snap.empty) {
+        // Nenhuma técnica cadastrada ainda: usa as sementes padrão como ponto de partida.
+        for (const id of Object.keys(TECNICAS_PADRAO)) {
+          tecnicas[id] = { nomeExibicao: TECNICAS_PADRAO[id].nomeExibicao, fases: construirFasesComRaio(TECNICAS_PADRAO[id].fases) };
+        }
+      } else {
+        snap.forEach(docSnap => {
+          const dados = docSnap.data();
+          if (dados.fases && dados.fases.length > 0) {
+            tecnicas[docSnap.id] = { nomeExibicao: dados.nomeExibicao || "Técnica", fases: construirFasesComRaio(dados.fases) };
+          }
+        });
+      }
+    } catch (e) {
+      for (const id of Object.keys(TECNICAS_PADRAO)) {
         tecnicas[id] = { nomeExibicao: TECNICAS_PADRAO[id].nomeExibicao, fases: construirFasesComRaio(TECNICAS_PADRAO[id].fases) };
       }
     }
+
+    tecnicaAtual = Object.keys(tecnicas)[0];
     montarAbas();
     resetarEstadoVisual();
   }
