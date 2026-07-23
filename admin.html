@@ -19,10 +19,11 @@
       <p style="font-family:'Playfair Display',serif; font-weight:700; font-size:18px; color:#1B2A4A; margin:0;">Painel Administrativo</p>
     </a>
 
-    <div style="display:flex; gap:8px; margin-bottom:18px;">
-      <div id="aba-clientes" onclick="mostrarAba('clientes')" style="flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; color:#FFFFFF; background:#1B2A4A;">Clientes</div>
-      <div id="aba-conteudo" onclick="mostrarAba('conteudo')" style="flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; color:#8A8560; background:#F0EEE6;">Conteúdo</div>
-      <div id="aba-contato" onclick="mostrarAba('contato')" style="flex:1; text-align:center; padding:9px 0; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; color:#8A8560; background:#F0EEE6;">Contato</div>
+    <div style="display:flex; gap:6px; margin-bottom:18px;">
+      <div id="aba-clientes" onclick="mostrarAba('clientes')" style="flex:1; text-align:center; padding:9px 2px; border-radius:9px; font-size:11.5px; font-weight:600; cursor:pointer; color:#FFFFFF; background:#1B2A4A;">Clientes</div>
+      <div id="aba-conteudo" onclick="mostrarAba('conteudo')" style="flex:1; text-align:center; padding:9px 2px; border-radius:9px; font-size:11.5px; font-weight:600; cursor:pointer; color:#8A8560; background:#F0EEE6;">Conteúdo</div>
+      <div id="aba-contato" onclick="mostrarAba('contato')" style="flex:1; text-align:center; padding:9px 2px; border-radius:9px; font-size:11.5px; font-weight:600; cursor:pointer; color:#8A8560; background:#F0EEE6;">Contato</div>
+      <div id="aba-respiracao" onclick="mostrarAba('respiracao')" style="flex:1; text-align:center; padding:9px 2px; border-radius:9px; font-size:11.5px; font-weight:600; cursor:pointer; color:#8A8560; background:#F0EEE6;">Respiração</div>
     </div>
 
     <div id="painel-clientes" style="display:flex; flex-direction:column; gap:12px;">
@@ -94,6 +95,43 @@
       <p id="msg-contato" style="font-size:12px; margin:0; display:none;"></p>
     </div>
 
+    <div id="painel-respiracao" style="display:none; flex-direction:column; gap:12px;">
+      <p style="font-size:13px; color:#1B2A4A; font-weight:600; margin:0;">Técnicas de respiração</p>
+
+      <div id="lista-tecnicas"></div>
+
+      <button id="botao-nova-tecnica" style="background:#1B2A4A; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; margin-top:6px;">+ Nova técnica</button>
+
+      <div id="construtor-tecnica" style="display:none; flex-direction:column; gap:12px; background:#FFFFFF; border-radius:12px; padding:14px; box-shadow:0 3px 10px rgba(27,42,74,0.06); margin-top:6px;">
+        <p id="titulo-construtor" style="font-size:13px; color:#1B2A4A; font-weight:600; margin:0;">Nova técnica</p>
+
+        <div>
+          <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">NOME DA TÉCNICA</p>
+          <input id="input-nome-tecnica" type="text" placeholder="ex: 4-7-8" style="width:100%; box-sizing:border-box; background:#FAF9F6; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+        </div>
+
+        <div>
+          <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">SEQUÊNCIA DO CICLO</p>
+          <div id="lista-fases-construtor" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>
+          <div style="display:flex; gap:6px;">
+            <select id="select-tipo-fase" style="flex:1; box-sizing:border-box; background:#FAF9F6; border:1px solid #E4E1D8; border-radius:9px; padding:10px 8px; font-size:13px;">
+              <option value="inspirar">Inspire</option>
+              <option value="manter">Segure</option>
+              <option value="expirar">Expire</option>
+            </select>
+            <input id="input-segundos-fase" type="number" min="1" placeholder="seg" style="width:64px; box-sizing:border-box; background:#FAF9F6; border:1px solid #E4E1D8; border-radius:9px; padding:10px 8px; font-size:13px;">
+            <button id="botao-add-fase" style="background:#8A8560; color:#fff; border:none; border-radius:9px; padding:0 16px; font-size:16px; font-weight:600; cursor:pointer;">+</button>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <button id="botao-salvar-tecnica" style="flex:1; background:#1B2A4A; color:#fff; border:none; border-radius:9px; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer;">Salvar técnica</button>
+          <button id="botao-cancelar-tecnica" style="background:#F0EEE6; color:#8A8560; border:none; border-radius:9px; padding:12px 16px; font-size:13.5px; font-weight:600; cursor:pointer;">Cancelar</button>
+        </div>
+        <p id="msg-tecnica" style="font-size:12px; margin:0; display:none;"></p>
+      </div>
+    </div>
+
   </div>
 
   <p id="mensagem-acesso-negado" style="display:none; text-align:center; color:#B23A3A; font-size:14px; margin-top:100px;">Acesso restrito. Redirecionando...</p>
@@ -101,7 +139,7 @@
   <script type="module">
     import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCuUQi_s4v0Iat3FkzEfY06lX1NIaDAJ3Y",
@@ -113,10 +151,14 @@
     };
 
     const UID_ADMIN = "4jnMbmwV2JbSmKkzcJLBum7ybyK2";
+    const NOME_FASE = { inspirar: "Inspire", manter: "Segure", expirar: "Expire" };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    let fasesConstrutor = [];
+    let tecnicaEditandoId = null;
 
     onAuthStateChanged(auth, (user) => {
       if (user && user.uid === UID_ADMIN) {
@@ -130,8 +172,8 @@
     });
 
     window.mostrarAba = function (nome) {
-      const paineis = { clientes: document.getElementById("painel-clientes"), conteudo: document.getElementById("painel-conteudo"), contato: document.getElementById("painel-contato") };
-      const abas = { clientes: document.getElementById("aba-clientes"), conteudo: document.getElementById("aba-conteudo"), contato: document.getElementById("aba-contato") };
+      const paineis = { clientes: document.getElementById("painel-clientes"), conteudo: document.getElementById("painel-conteudo"), contato: document.getElementById("painel-contato"), respiracao: document.getElementById("painel-respiracao") };
+      const abas = { clientes: document.getElementById("aba-clientes"), conteudo: document.getElementById("aba-conteudo"), contato: document.getElementById("aba-contato"), respiracao: document.getElementById("aba-respiracao") };
 
       Object.keys(paineis).forEach(key => {
         paineis[key].style.display = (key === nome) ? "flex" : "none";
@@ -140,6 +182,7 @@
       });
 
       if (nome === "contato") carregarContatoAdmin();
+      if (nome === "respiracao") carregarTecnicasAdmin();
     };
 
     window.verificarNovaCategoria = function () {
@@ -221,6 +264,143 @@
         msg.style.display = "block";
       }
     });
+
+    // ---------- TÉCNICAS DE RESPIRAÇÃO ----------
+
+    async function carregarTecnicasAdmin() {
+      const lista = document.getElementById("lista-tecnicas");
+      lista.innerHTML = "<p style='font-size:12px; color:#918D7E;'>Carregando...</p>";
+      const snap = await getDocs(collection(db, "respiracao_config"));
+      lista.innerHTML = "";
+
+      if (snap.empty) {
+        lista.innerHTML = "<p style='font-size:12px; color:#918D7E;'>Nenhuma técnica cadastrada ainda.</p>";
+        return;
+      }
+
+      snap.forEach(docSnap => {
+        const dados = docSnap.data();
+        const resumo = (dados.fases || []).map(f => (NOME_FASE[f.tipo] || f.tipo) + " " + f.segundos + "s").join(" → ");
+        const card = document.createElement("div");
+        card.style.cssText = "background:#FFFFFF; border-radius:12px; padding:12px 14px; box-shadow:0 3px 10px rgba(27,42,74,0.06); margin-top:8px;";
+        card.innerHTML = `
+          <p style="font-size:12.5px; font-weight:600; margin:0; color:#3A3A3A;">${dados.nomeExibicao || "Sem nome"}</p>
+          <p style="font-size:10.5px; color:#918D7E; margin:4px 0 8px;">${resumo}</p>
+          <div style="display:flex; gap:8px;">
+            <button class="botao-editar-tecnica" data-id="${docSnap.id}" style="flex:1; background:#F0EEE6; color:#1B2A4A; border:none; border-radius:8px; padding:7px; font-size:12px; font-weight:600; cursor:pointer;">Editar</button>
+            <button class="botao-excluir-tecnica" data-id="${docSnap.id}" style="flex:1; background:#FBEAEA; color:#B23A3A; border:none; border-radius:8px; padding:7px; font-size:12px; font-weight:600; cursor:pointer;">Excluir</button>
+          </div>
+        `;
+        lista.appendChild(card);
+      });
+
+      document.querySelectorAll(".botao-editar-tecnica").forEach(botao => {
+        botao.addEventListener("click", () => editarTecnica(botao.dataset.id));
+      });
+      document.querySelectorAll(".botao-excluir-tecnica").forEach(botao => {
+        botao.addEventListener("click", () => excluirTecnica(botao.dataset.id));
+      });
+    }
+
+    function renderFasesConstrutor() {
+      const container = document.getElementById("lista-fases-construtor");
+      container.innerHTML = "";
+      if (fasesConstrutor.length === 0) {
+        container.innerHTML = "<p style='font-size:11.5px; color:#B0AC9C; margin:0;'>Nenhuma fase adicionada ainda.</p>";
+        return;
+      }
+      fasesConstrutor.forEach((f, i) => {
+        const linha = document.createElement("div");
+        linha.style.cssText = "display:flex; align-items:center; justify-content:space-between; background:#FAF9F6; border:1px solid #E4E1D8; border-radius:8px; padding:7px 10px;";
+        linha.innerHTML = `<span style="font-size:12.5px; color:#1B2A4A;">${i + 1}. ${NOME_FASE[f.tipo]} — ${f.segundos}s</span>
+          <span data-i="${i}" class="botao-remover-fase" style="color:#B23A3A; cursor:pointer; font-size:15px; font-weight:700;">×</span>`;
+        container.appendChild(linha);
+      });
+      document.querySelectorAll(".botao-remover-fase").forEach(el => {
+        el.addEventListener("click", () => {
+          fasesConstrutor.splice(Number(el.dataset.i), 1);
+          renderFasesConstrutor();
+        });
+      });
+    }
+
+    document.getElementById("botao-add-fase").addEventListener("click", function () {
+      const tipo = document.getElementById("select-tipo-fase").value;
+      const segundos = parseInt(document.getElementById("input-segundos-fase").value, 10);
+      if (!segundos || segundos <= 0) {
+        alert("Informe quantos segundos essa fase deve durar.");
+        return;
+      }
+      fasesConstrutor.push({ tipo, segundos });
+      document.getElementById("input-segundos-fase").value = "";
+      renderFasesConstrutor();
+    });
+
+    document.getElementById("botao-nova-tecnica").addEventListener("click", function () {
+      tecnicaEditandoId = null;
+      fasesConstrutor = [];
+      document.getElementById("input-nome-tecnica").value = "";
+      document.getElementById("titulo-construtor").textContent = "Nova técnica";
+      document.getElementById("msg-tecnica").style.display = "none";
+      renderFasesConstrutor();
+      document.getElementById("construtor-tecnica").style.display = "flex";
+    });
+
+    document.getElementById("botao-cancelar-tecnica").addEventListener("click", function () {
+      document.getElementById("construtor-tecnica").style.display = "none";
+    });
+
+    async function editarTecnica(id) {
+      const snap = await getDoc(doc(db, "respiracao_config", id));
+      if (!snap.exists()) return;
+      const dados = snap.data();
+      tecnicaEditandoId = id;
+      fasesConstrutor = (dados.fases || []).map(f => ({ tipo: f.tipo, segundos: f.segundos }));
+      document.getElementById("input-nome-tecnica").value = dados.nomeExibicao || "";
+      document.getElementById("titulo-construtor").textContent = "Editar técnica";
+      document.getElementById("msg-tecnica").style.display = "none";
+      renderFasesConstrutor();
+      document.getElementById("construtor-tecnica").style.display = "flex";
+    }
+
+    async function excluirTecnica(id) {
+      if (!confirm("Tem certeza que deseja excluir essa técnica? Essa ação não pode ser desfeita.")) return;
+      await deleteDoc(doc(db, "respiracao_config", id));
+      carregarTecnicasAdmin();
+    }
+
+    document.getElementById("botao-salvar-tecnica").addEventListener("click", async function () {
+      const nomeExibicao = document.getElementById("input-nome-tecnica").value.trim();
+      const msg = document.getElementById("msg-tecnica");
+
+      if (!nomeExibicao || fasesConstrutor.length === 0) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Dê um nome à técnica e adicione ao menos uma fase.";
+        msg.style.display = "block";
+        return;
+      }
+
+      try {
+        if (tecnicaEditandoId) {
+          await setDoc(doc(db, "respiracao_config", tecnicaEditandoId), { nomeExibicao, fases: fasesConstrutor, atualizadoEm: serverTimestamp() });
+        } else {
+          await addDoc(collection(db, "respiracao_config"), { nomeExibicao, fases: fasesConstrutor, criadoEm: serverTimestamp() });
+        }
+        msg.style.color = "#3A6650";
+        msg.textContent = "✅ Técnica salva com sucesso!";
+        msg.style.display = "block";
+        setTimeout(() => {
+          document.getElementById("construtor-tecnica").style.display = "none";
+          carregarTecnicasAdmin();
+        }, 700);
+      } catch (erro) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Erro ao salvar: " + erro.message;
+        msg.style.display = "block";
+      }
+    });
+
+    // ---------- FIM TÉCNICAS DE RESPIRAÇÃO ----------
 
     document.getElementById("botao-adicionar-conteudo").addEventListener("click", async function () {
       const tipo = document.getElementById("select-tipo").value;
