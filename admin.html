@@ -446,6 +446,9 @@
     document.getElementById("botao-cadastrar-cliente").addEventListener("click", async function () {
       const email = document.getElementById("input-email-cliente").value.trim();
       const senha = document.getElementById("input-senha-cliente").value.trim();
+      const nome = document.getElementById("input-nome-cliente").value.trim();
+      const nascimento = document.getElementById("input-nascimento-cliente").value;
+      const telefone = document.getElementById("input-telefone-cliente").value.trim();
       const msg = document.getElementById("msg-cliente");
 
       if (!email || !senha || senha.length < 6) {
@@ -459,13 +462,19 @@
       const authAuxiliar = getAuth(appAuxiliar);
 
       try {
-        await createUserWithEmailAndPassword(authAuxiliar, email, senha);
+        const credencial = await createUserWithEmailAndPassword(authAuxiliar, email, senha);
+        await setDoc(doc(getFirestore(appAuxiliar), "clientes", credencial.user.uid), {
+          email, nome, nascimento, telefone, criadoEm: serverTimestamp()
+        });
         await signOut(authAuxiliar);
         msg.style.color = "#3A6650";
         msg.textContent = "✅ Cliente cadastrado! Agora repasse o e-mail e a senha a ele.";
         msg.style.display = "block";
         document.getElementById("input-email-cliente").value = "";
         document.getElementById("input-senha-cliente").value = "";
+        document.getElementById("input-nome-cliente").value = "";
+        document.getElementById("input-nascimento-cliente").value = "";
+        document.getElementById("input-telefone-cliente").value = "";
       } catch (erro) {
         msg.style.color = "#B23A3A";
         msg.textContent = "Erro: " + (erro.code === "auth/email-already-in-use" ? "esse e-mail já está cadastrado." : erro.message);
