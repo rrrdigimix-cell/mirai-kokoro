@@ -35,8 +35,8 @@
         <input id="input-email-cliente" type="email" placeholder="cliente@email.com" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
       </div>
       <div>
-        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">SENHA DE ACESSO</p>
-        <input id="input-senha-cliente" type="text" placeholder="mínimo 6 caracteres" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+        <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">SENHA DE ACESSO (OPCIONAL)</p>
+        <input id="input-senha-cliente" type="text" placeholder="deixe em branco para o cliente definir a própria senha por e-mail" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
       </div>
       <div>
         <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">NOME COMPLETO</p>
@@ -166,7 +166,7 @@
 
   <script type="module">
     import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -476,30 +476,46 @@
 
     document.getElementById("botao-cadastrar-cliente").addEventListener("click", async function () {
       const email = document.getElementById("input-email-cliente").value.trim();
-      const senha = document.getElementById("input-senha-cliente").value.trim();
+      const senhaDigitada = document.getElementById("input-senha-cliente").value.trim();
       const nome = document.getElementById("input-nome-cliente").value.trim();
       const nascimento = document.getElementById("input-nascimento-cliente").value;
       const telefone = document.getElementById("input-telefone-cliente").value.trim();
       const msg = document.getElementById("msg-cliente");
 
-      if (!email || !senha || senha.length < 6) {
+      if (!email) {
         msg.style.color = "#B23A3A";
-        msg.textContent = "Preencha um e-mail válido e uma senha com pelo menos 6 caracteres.";
+        msg.textContent = "Preencha um e-mail válido.";
         msg.style.display = "block";
         return;
       }
+      if (senhaDigitada && senhaDigitada.length < 6) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Se for definir uma senha, ela precisa ter pelo menos 6 caracteres.";
+        msg.style.display = "block";
+        return;
+      }
+
+      const enviarLinkPorEmail = !senhaDigitada;
+      const senhaFinal = senhaDigitada || (Math.random().toString(36).slice(-10) + "Aa1!");
 
       const appAuxiliar = getApps().find(a => a.name === "Auxiliar") || initializeApp(firebaseConfig, "Auxiliar");
       const authAuxiliar = getAuth(appAuxiliar);
 
       try {
-        const credencial = await createUserWithEmailAndPassword(authAuxiliar, email, senha);
+        const credencial = await createUserWithEmailAndPassword(authAuxiliar, email, senhaFinal);
         await setDoc(doc(getFirestore(appAuxiliar), "clientes", credencial.user.uid), {
           email, nome, nascimento, telefone, criadoEm: serverTimestamp()
         });
         await signOut(authAuxiliar);
-        msg.style.color = "#3A6650";
-        msg.textContent = "✅ Cliente cadastrado! Agora repasse o e-mail e a senha a ele.";
+
+        if (enviarLinkPorEmail) {
+          await sendPasswordResetEmail(auth, email);
+          msg.style.color = "#3A6650";
+          msg.textContent = "✅ Cliente cadastrado! Um e-mail foi enviado para ele definir a própria senha.";
+        } else {
+          msg.style.color = "#3A6650";
+          msg.textContent = "✅ Cliente cadastrado! Agora repasse o e-mail e a senha a ele.";
+        }
         msg.style.display = "block";
         document.getElementById("input-email-cliente").value = "";
         document.getElementById("input-senha-cliente").value = "";
