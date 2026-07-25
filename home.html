@@ -225,12 +225,12 @@
           snap.forEach(docSnap => avisos.push({ id: docSnap.id, ...docSnap.data() }));
           avisos.sort((a, b) => (b.criadoEm?.toMillis?.() || 0) - (a.criadoEm?.toMillis?.() || 0));
 
-          const ultimoVisto = parseInt(localStorage.getItem("ultimoAvisoVisto") || "0", 10);
-          const naoLidos = avisos.filter(a => (a.criadoEm?.toMillis?.() || 0) > ultimoVisto);
+          const totalVisto = parseInt(localStorage.getItem("totalAvisosVistos") || "0", 10);
+          const naoLidos = avisos.length - totalVisto;
 
           const badge = document.getElementById("badge-avisos");
-          if (naoLidos.length > 0) {
-            badge.textContent = naoLidos.length;
+          if (naoLidos > 0) {
+            badge.textContent = naoLidos;
             badge.style.display = "block";
           } else {
             badge.style.display = "none";
@@ -252,7 +252,7 @@
             </div>`).join("");
 
         document.getElementById("modal-avisos").style.display = "flex";
-        localStorage.setItem("ultimoAvisoVisto", Date.now().toString());
+        localStorage.setItem("totalAvisosVistos", avisos.length.toString());
         document.getElementById("badge-avisos").style.display = "none";
       });
 
