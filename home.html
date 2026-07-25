@@ -220,7 +220,7 @@
 
       async function carregarAvisosNaoLidos() {
         try {
-          const snap = await getDocs(collection(db, "avisos"));
+          const snap = await getDocs(collection(db, "mensagens"));
           const avisos = [];
           snap.forEach(docSnap => avisos.push({ id: docSnap.id, ...docSnap.data() }));
           avisos.sort((a, b) => (b.criadoEm?.toMillis?.() || 0) - (a.criadoEm?.toMillis?.() || 0));
