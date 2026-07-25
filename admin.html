@@ -497,6 +497,57 @@
         msg.style.display = "block";
       }
     });
+
+    // ---------- AVISOS ----------
+
+    async function carregarAvisosAdmin() {
+      const lista = document.getElementById("lista-avisos-enviados");
+      lista.innerHTML = "<p style='font-size:12px; color:#918D7E;'>Carregando...</p>";
+      const snap = await getDocs(collection(db, "mensagens"));
+      const avisos = [];
+      snap.forEach(docSnap => avisos.push({ id: docSnap.id, ...docSnap.data() }));
+      avisos.sort((a, b) => (b.criadoEm?.seconds || 0) - (a.criadoEm?.seconds || 0));
+
+      lista.innerHTML = "";
+      if (avisos.length === 0) {
+        lista.innerHTML = "<p style='font-size:12px; color:#918D7E;'>Nenhum aviso enviado ainda.</p>";
+        return;
+      }
+      avisos.forEach(aviso => {
+        const data = aviso.criadoEm?.seconds ? new Date(aviso.criadoEm.seconds * 1000).toLocaleDateString("pt-BR") : "";
+        lista.innerHTML += `<div style="background:#FFFFFF; border-radius:12px; padding:12px 14px; box-shadow:0 3px 10px rgba(27,42,74,0.06); margin-top:8px;">
+          <p style="font-size:12.5px; margin:0; color:#3A3A3A;">${aviso.texto}</p>
+          <p style="font-size:10.5px; color:#918D7E; margin:4px 0 0;">${data}</p>
+        </div>`;
+      });
+    }
+
+    document.getElementById("botao-enviar-aviso").addEventListener("click", async function () {
+      const texto = document.getElementById("input-texto-aviso").value.trim();
+      const msg = document.getElementById("msg-aviso");
+
+      if (!texto) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Escreva o texto do aviso antes de enviar.";
+        msg.style.display = "block";
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "mensagens"), { texto, criadoEm: serverTimestamp() });
+        msg.style.color = "#3A6650";
+        msg.textContent = "✅ Aviso enviado a todos os clientes!";
+        msg.style.display = "block";
+        document.getElementById("input-texto-aviso").value = "";
+        carregarAvisosAdmin();
+      } catch (erro) {
+        msg.style.color = "#B23A3A";
+        msg.textContent = "Erro ao enviar: " + erro.message;
+        msg.style.display = "block";
+      }
+    });
+
+    // ---------- FIM AVISOS ----------
   </script>
 
 </body>
