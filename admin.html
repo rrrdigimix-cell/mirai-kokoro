@@ -187,6 +187,7 @@
 
     let fasesConstrutor = [];
     let tecnicaEditandoId = null;
+    let itensPublicados = [];
 
     onAuthStateChanged(auth, (user) => {
       if (user && user.uid === UID_ADMIN) {
@@ -248,14 +249,25 @@
       const snap = await getDocs(collection(db, "conteudo"));
       const lista = document.getElementById("lista-itens-publicados");
       lista.innerHTML = "";
+
+      itensPublicados = [];
       snap.forEach(docSnap => {
-        const item = docSnap.data();
+        itensPublicados.push({ id: docSnap.id, ...docSnap.data() });
+      });
+
+      itensPublicados.sort((a, b) => chaveOrdem(a) - chaveOrdem(b));
+
+      itensPublicados.forEach((item, indice) => {
         const card = document.createElement("div");
         card.style.cssText = "background:#FFFFFF; border-radius:12px; padding:12px 14px; box-shadow:0 3px 10px rgba(27,42,74,0.06); margin-top:8px;";
         card.innerHTML = `
           <p style="font-size:12.5px; font-weight:600; margin:0; color:#3A3A3A;">${item.titulo}</p>
           <p style="font-size:10.5px; color:#918D7E; margin:4px 0 8px;">${item.tipo} · ${item.categoria || "Geral"}</p>
-          <button class="botao-excluir-conteudo" data-id="${docSnap.id}" style="width:100%; background:#FBEAEA; color:#B23A3A; border:none; border-radius:8px; padding:7px; font-size:12px; font-weight:600; cursor:pointer;">Excluir</button>
+          <div style="display:flex; gap:6px;">
+            <button class="botao-mover-conteudo" data-id="${item.id}" data-direcao="cima" ${indice === 0 ? "disabled" : ""} style="background:#F0EEE6; color:#1B2A4A; border:none; border-radius:8px; padding:7px 10px; font-size:13px; font-weight:600; cursor:pointer; opacity:${indice === 0 ? "0.4" : "1"};">▲</button>
+            <button class="botao-mover-conteudo" data-id="${item.id}" data-direcao="baixo" ${indice === itensPublicados.length - 1 ? "disabled" : ""} style="background:#F0EEE6; color:#1B2A4A; border:none; border-radius:8px; padding:7px 10px; font-size:13px; font-weight:600; cursor:pointer; opacity:${indice === itensPublicados.length - 1 ? "0.4" : "1"};">▼</button>
+            <button class="botao-excluir-conteudo" data-id="${item.id}" style="flex:1; background:#FBEAEA; color:#B23A3A; border:none; border-radius:8px; padding:7px; font-size:12px; font-weight:600; cursor:pointer;">Excluir</button>
+          </div>
         `;
         lista.appendChild(card);
       });
@@ -263,6 +275,30 @@
       document.querySelectorAll(".botao-excluir-conteudo").forEach(botao => {
         botao.addEventListener("click", () => excluirConteudo(botao.dataset.id));
       });
+      document.querySelectorAll(".botao-mover-conteudo").forEach(botao => {
+        botao.addEventListener("click", () => moverItemConteudo(botao.dataset.id, botao.dataset.direcao));
+      });
+    }
+
+    function chaveOrdem(item) {
+      if (typeof item.ordem === "number") return item.ordem;
+      return item.criadoEm?.seconds || 0;
+    }
+
+    async function moverItemConteudo(id, direcao) {
+      const indiceAtual = itensPublicados.findIndex(i => i.id === id);
+      const indiceAlvo = direcao === "cima" ? indiceAtual - 1 : indiceAtual + 1;
+      if (indiceAtual === -1 || indiceAlvo < 0 || indiceAlvo >= itensPublicados.length) return;
+
+      const itemAtual = itensPublicados[indiceAtual];
+      const itemAlvo = itensPublicados[indiceAlvo];
+      const ordemAtual = chaveOrdem(itemAtual);
+      const ordemAlvo = chaveOrdem(itemAlvo);
+
+      await setDoc(doc(db, "conteudo", itemAtual.id), { ordem: ordemAlvo }, { merge: true });
+      await setDoc(doc(db, "conteudo", itemAlvo.id), { ordem: ordemAtual }, { merge: true });
+
+      carregarItensPublicados();
     }
 
     async function excluirConteudo(id) {
