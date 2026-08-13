@@ -69,11 +69,17 @@
     const cabecalho = document.getElementById("cabecalho");
     const tituloPagina = document.getElementById("titulo-pagina");
 
+    function chaveOrdem(item) {
+      if (typeof item.ordem === "number") return item.ordem;
+      return item.criadoEm?.seconds || 0;
+    }
+
     async function carregar() {
       const q = query(collection(db, "conteudo"), where("tipo", "==", TIPO));
       const snap = await getDocs(q);
       const itens = [];
       snap.forEach(doc => itens.push(doc.data()));
+      itens.sort((a, b) => chaveOrdem(a) - chaveOrdem(b));
 
       if (!categoriaAtual) {
         cabecalho.onclick = () => window.location.href = "home.html";
