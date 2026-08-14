@@ -126,6 +126,12 @@
         </div>
 
         <div>
+          <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">LINK DA MÚSICA DE FUNDO (OPCIONAL)</p>
+          <input id="input-musica-tecnica" type="text" placeholder="cole aqui o link direto do arquivo de áudio (.mp3)" style="width:100%; box-sizing:border-box; background:#FAF9F6; border:1px solid #E4E1D8; border-radius:9px; padding:10px 12px; font-size:13px;">
+          <p style="font-size:10px; color:#B0AC9C; margin:4px 0 0;">precisa ser um link direto de áudio (não funciona com link de página do Google Drive).</p>
+        </div>
+
+        <div>
           <p style="font-size:11px; color:#79778E; font-weight:600; margin:0 0 4px;">SEQUÊNCIA DO CICLO</p>
           <div id="lista-fases-construtor" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>
           <div style="display:flex; gap:6px;">
@@ -420,6 +426,7 @@
       tecnicaEditandoId = null;
       fasesConstrutor = [];
       document.getElementById("input-nome-tecnica").value = "";
+      document.getElementById("input-musica-tecnica").value = "";
       document.getElementById("titulo-construtor").textContent = "Nova técnica";
       document.getElementById("msg-tecnica").style.display = "none";
       renderFasesConstrutor();
@@ -434,9 +441,10 @@
       const snap = await getDoc(doc(db, "respiracao_config", id));
       if (!snap.exists()) return;
       const dados = snap.data();
-      tecnicaEditandoId = id;
+     tecnicaEditandoId = id;
       fasesConstrutor = (dados.fases || []).map(f => ({ tipo: f.tipo, segundos: f.segundos }));
       document.getElementById("input-nome-tecnica").value = dados.nomeExibicao || "";
+      document.getElementById("input-musica-tecnica").value = dados.musicaFundo || "";
       document.getElementById("titulo-construtor").textContent = "Editar técnica";
       document.getElementById("msg-tecnica").style.display = "none";
       renderFasesConstrutor();
@@ -451,6 +459,7 @@
 
     document.getElementById("botao-salvar-tecnica").addEventListener("click", async function () {
       const nomeExibicao = document.getElementById("input-nome-tecnica").value.trim();
+      const musicaFundo = document.getElementById("input-musica-tecnica").value.trim();
       const msg = document.getElementById("msg-tecnica");
 
       if (!nomeExibicao || fasesConstrutor.length === 0) {
@@ -462,9 +471,9 @@
 
       try {
         if (tecnicaEditandoId) {
-          await setDoc(doc(db, "respiracao_config", tecnicaEditandoId), { nomeExibicao, fases: fasesConstrutor, atualizadoEm: serverTimestamp() });
+          await setDoc(doc(db, "respiracao_config", tecnicaEditandoId), { nomeExibicao, fases: fasesConstrutor, musicaFundo, atualizadoEm: serverTimestamp() });
         } else {
-          await addDoc(collection(db, "respiracao_config"), { nomeExibicao, fases: fasesConstrutor, criadoEm: serverTimestamp() });
+          await addDoc(collection(db, "respiracao_config"), { nomeExibicao, fases: fasesConstrutor, musicaFundo, criadoEm: serverTimestamp() });
         }
         msg.style.color = "#3A6650";
         msg.textContent = "✅ Técnica salva com sucesso!";
