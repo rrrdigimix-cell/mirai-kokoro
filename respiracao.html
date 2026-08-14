@@ -59,6 +59,7 @@
 <body>
 
 <div class="app">
+  <audio id="audio-fundo" loop></audio>
   <div class="fundo-foto"></div>
   <div class="camada-clareamento"></div>
 
@@ -157,6 +158,17 @@
   const balaoFixo = document.getElementById("balao-fixo");
   const numero = document.getElementById("numero");
   const faseTexto = document.getElementById("fase-texto");
+  const audioFundo = document.getElementById("audio-fundo");
+
+  function atualizarAudioFundo() {
+    const musica = tecnicas[tecnicaAtual] && tecnicas[tecnicaAtual].musica;
+    audioFundo.pause();
+    if (musica) {
+      audioFundo.src = musica;
+    } else {
+      audioFundo.removeAttribute("src");
+    }
+  }
 
   let tecnicas = {};
   let tecnicaAtual = "478";
@@ -199,7 +211,7 @@
         snap.forEach(docSnap => {
           const dados = docSnap.data();
           if (dados.fases && dados.fases.length > 0) {
-            tecnicas[docSnap.id] = { nomeExibicao: dados.nomeExibicao || "Técnica", fases: construirFasesComRaio(dados.fases) };
+            tecnicas[docSnap.id] = { nomeExibicao: dados.nomeExibicao || "Técnica", fases: construirFasesComRaio(dados.fases), musica: dados.musicaFundo || "" };
           }
         });
       }
@@ -212,6 +224,7 @@
     tecnicaAtual = Object.keys(tecnicas)[0];
     montarAbas();
     resetarEstadoVisual();
+    atualizarAudioFundo();
   }
 
   function montarAbas() {
@@ -238,6 +251,7 @@
     document.querySelectorAll(".aba-tecnica").forEach(a => a.classList.remove("ativa"));
     elemento.classList.add("ativa");
     resetarEstadoVisual();
+    atualizarAudioFundo();
   }
 
   function resetarEstadoVisual() {
@@ -296,6 +310,7 @@
     clearTimeout(timeoutAtivo);
     clearInterval(intervaloContagem);
     clearInterval(intervaloCronometro);
+    audioFundo.pause();
     document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-play" style="font-size:15px;"></i> Iniciar';
   }
 
@@ -307,6 +322,7 @@
     passoAtualObj = null;
     restanteSegundos = 0;
     duracaoRestanteMs = 0;
+    audioFundo.currentTime = 0;
     document.getElementById("cronometro").textContent = "00:00";
     document.getElementById("ciclos-texto").textContent = "ciclos: 0";
     resetarEstadoVisual();
@@ -321,10 +337,12 @@
       clearTimeout(timeoutAtivo);
       clearInterval(intervaloContagem);
       clearInterval(intervaloCronometro);
+      audioFundo.pause();
       document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-play" style="font-size:15px;"></i> Iniciar';
     } else {
       rodando = true;
       document.getElementById("botao-iniciar").innerHTML = '<i class="ti ti-player-pause" style="font-size:15px;"></i> Pausar';
+      if (audioFundo.getAttribute("src")) audioFundo.play().catch(() => {});
       intervaloCronometro = setInterval(() => {
         segundosTotais++;
         document.getElementById("cronometro").textContent = formatarCronometro(segundosTotais);
@@ -358,7 +376,7 @@
     const duracaoSeg = duracaoRestanteMs / 1000;
 
     faseTexto.textContent = passo.nome;
-    numero.textContent = restanteSegundos;
+    numero.textContent = passo.seg - restanteSegundos + 1;
 
     balaoFixo.style.transition = "clip-path " + duracaoSeg + "s linear";
     void balaoFixo.offsetHeight;
@@ -392,7 +410,7 @@
     clearInterval(intervaloContagem);
     intervaloContagem = setInterval(() => {
       restanteSegundos--;
-      if (restanteSegundos > 0) numero.textContent = restanteSegundos;
+      if (restanteSegundos > 0) numero.textContent = passo.seg - restanteSegundos + 1;
     }, 1000);
 
     clearTimeout(timeoutAtivo);
